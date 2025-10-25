@@ -23,6 +23,11 @@ public class AuthService : IAuthService
 
     public async Task<AuthenticationResponseDto> LoginAsync(UserCredentialsDto userCredentials)
     {
+        if (!await VerifyRecaptchaAsync(userCredentials.CaptchaToken))
+        {
+            throw new UnauthorizedAccessException("Invalid captcha");
+        }
+
         var user = await _userRepository.GetByEmailAsync(userCredentials.Email);
         if (user == null)
             throw new KeyNotFoundException($"User with email '{userCredentials.Email}' not found");
@@ -35,6 +40,23 @@ public class AuthService : IAuthService
             Email = user.Email,
             AccessToken = GenerateAccessToken(user)
         };
+    }
+
+    private async Task<bool> VerifyRecaptchaAsync(string captchaToken)
+    {
+        using var client = new HttpClient();
+        var values = new Dictionary<string, string>
+        {
+            { "secret", _jwtOptions.RecaptchaSecret },
+            { "response", captchaToken }
+        };
+
+        var content = new FormUrlEncodedContent(values);
+        var response = await client.PostAsync("https://www.google.com/recaptcha/api/siteverify", content);
+        var json = await response.Content.ReadAsStringAsync();
+
+        var result = System.Text.Json.JsonSerializer.Deserialize<RecaptchaResponse>(json);
+        return result?.Success ?? false;
     }
 
     private string GenerateAccessToken(User user)

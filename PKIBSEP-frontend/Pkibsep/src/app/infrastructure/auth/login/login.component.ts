@@ -7,24 +7,34 @@ import { Login } from '../model/login.model';
 @Component({
   selector: 'xp-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
+  captchaToken: string = '';
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   loginForm = new FormGroup({
-    username: new FormControl('', [Validators.required]),
+    email: new FormControl('', [Validators.required]),
     password: new FormControl('', [Validators.required]),
   });
 
+  onCaptchaResolved(token: string | null) {
+    if (token) {
+      this.captchaToken = token;
+    }
+  }
+
   login(): void {
+    if (!this.captchaToken) {
+      alert('Molimo vas da rešite captcha');
+      return;
+    }
+
     const login: Login = {
-      username: this.loginForm.value.username || "",
-      password: this.loginForm.value.password || "",
+      email: this.loginForm.value.email || '',
+      password: this.loginForm.value.password || '',
+      captchaToken: this.captchaToken,
     };
 
     if (this.loginForm.valid) {
