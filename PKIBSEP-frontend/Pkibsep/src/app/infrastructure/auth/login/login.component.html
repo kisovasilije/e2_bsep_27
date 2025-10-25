@@ -1,16 +1,19 @@
 <form [formGroup]="loginForm" (ngSubmit)="login()">
-    <div>
-        <mat-form-field>
-            <mat-label>Username</mat-label>
-            <input matInput formControlName="username" type="text"/>
-        </mat-form-field>
-        <mat-form-field>
-            <mat-label>Password</mat-label>
-            <input matInput formControlName="password" type="password"/>
-        </mat-form-field>
+  <div>
+    <mat-form-field>
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email" type="text" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Password</mat-label>
+      <input matInput formControlName="password" type="password" />
+    </mat-form-field>
+    <re-captcha
+      siteKey="6LfP9vYrAAAAAN72wPaqlDbtLVSTht49iL6vcoQG"
+      (resolved)="onCaptchaResolved($event)"
+    >
+    </re-captcha>
     <button color="primary" type="submit" mat-raised-button>Login</button>
     <p>Don't have an account yet?<a href="/register">Sign Up</a></p>
-    </div>
+  </div>
 </form>
-
-
