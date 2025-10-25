@@ -1,4 +1,7 @@
+﻿using DotNetEnv;
 using PKIBSEP.Startup;
+
+Env.Load(".env");
 
 var builder = WebApplication.CreateBuilder(args);
 

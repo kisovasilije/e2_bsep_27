@@ -1,6 +1,0 @@
-@PKIBSEP_HostAddress = http://localhost:5096
-
-GET {{PKIBSEP_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
