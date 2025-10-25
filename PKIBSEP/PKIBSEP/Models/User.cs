@@ -46,5 +46,10 @@ namespace PKIBSEP.Models
         public DateTime? LastLoginAt { get; set; }
 
         public bool IsActive { get; set; } = true;
+
+        public bool VerifyPassword(string password)
+        {
+            return BCrypt.Net.BCrypt.Verify(password, PasswordHash);
+        }
     }
 }

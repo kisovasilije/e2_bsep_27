@@ -1,4 +1,5 @@
 ﻿using DotNetEnv;
+using PKIBSEP.Common;
 using PKIBSEP.Startup;
 
 Env.Load(".env");
@@ -7,8 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAuthorization();
 
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.ConfigureBSEP(builder.Configuration);
 builder.Services.ConfigureCors(builder.Configuration);
+builder.Services.AddJwtAuth(builder.Configuration);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
