@@ -20,6 +20,7 @@ namespace PKIBSEP.Startup
             // Register services
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthService, AuthService>();    
         }
 
         private static void SetupInfrastructure(IServiceCollection services, IConfiguration configuration)
