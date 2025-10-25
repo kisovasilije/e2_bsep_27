@@ -17,9 +17,16 @@ namespace PKIBSEP.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserCredentialsDto userCredentials)
         {
+            if (!GetRequestMeta(out var ipAddress, out var userAgent))
+            {
+                return BadRequest("Error occurred getting request metadata.");
+            }
+
+            var auth = new AuthenticationDto(userCredentials.Email, userCredentials.Password, userCredentials.CaptchaToken, ipAddress, userAgent);
+
             try
             {
-                var result = await _authService.LoginAsync(userCredentials);
+                var result = await _authService.LoginAsync(auth);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)
@@ -30,6 +37,22 @@ namespace PKIBSEP.Controllers
             {
                 return Unauthorized(ex.Message);
             }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        private bool GetRequestMeta(out string ipAddress, out string userAgent)
+        {
+            ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+            userAgent = Request.Headers["User-Agent"].ToString();
+            if (string.IsNullOrEmpty(ipAddress) || string.IsNullOrEmpty(userAgent))
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

@@ -11,6 +11,14 @@
         Login
       </button>
       <button
+        *ngIf="user"
+        color="primary"
+        mat-raised-button
+        [routerLink]="['profile']"
+      >
+        Profile
+      </button>
+      <button
         *ngIf="user && user.email !== ''"
         color="accent"
         mat-raised-button
