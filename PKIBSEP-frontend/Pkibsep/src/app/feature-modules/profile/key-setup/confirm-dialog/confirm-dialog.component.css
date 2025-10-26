@@ -1,0 +1,14 @@
+mat-dialog-content {
+  padding: 20px 0;
+}
+
+mat-dialog-content p {
+  white-space: pre-line;
+  line-height: 1.6;
+  color: #666;
+}
+
+mat-dialog-actions {
+  padding: 10px 0;
+  margin-top: 10px;
+}

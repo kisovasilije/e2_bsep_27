@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PKIBSEP.Database;
@@ -11,9 +12,11 @@ using PKIBSEP.Database;
 namespace PKIBSEP.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251026214842_AddPublicKeyToUser")]
+    partial class AddPublicKeyToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,74 +24,6 @@ namespace PKIBSEP.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("PKIBSEP.Models.PasswordEntry", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<int>("OwnerId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("SiteName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OwnerId");
-
-                    b.ToTable("PasswordEntries");
-                });
-
-            modelBuilder.Entity("PKIBSEP.Models.PasswordShare", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("EncryptedPassword")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("PasswordEntryId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("SharedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PasswordEntryId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PasswordShares");
-                });
 
             modelBuilder.Entity("PKIBSEP.Models.Session", b =>
                 {
@@ -209,36 +144,6 @@ namespace PKIBSEP.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("PKIBSEP.Models.PasswordEntry", b =>
-                {
-                    b.HasOne("PKIBSEP.Models.User", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("PKIBSEP.Models.PasswordShare", b =>
-                {
-                    b.HasOne("PKIBSEP.Models.PasswordEntry", "PasswordEntry")
-                        .WithMany("Shares")
-                        .HasForeignKey("PasswordEntryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PKIBSEP.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("PasswordEntry");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("PKIBSEP.Models.Session", b =>
                 {
                     b.HasOne("PKIBSEP.Models.User", "User")
@@ -248,11 +153,6 @@ namespace PKIBSEP.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("PKIBSEP.Models.PasswordEntry", b =>
-                {
-                    b.Navigation("Shares");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,0 +1,63 @@
+.key-setup-section {
+  margin-top: 30px;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.key-setup-section h2 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.no-key-info p {
+  margin: 10px 0;
+  color: #666;
+}
+
+.no-key-info button {
+  margin-top: 15px;
+}
+
+.key-exists-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.success-icon {
+  color: #4caf50;
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 10px;
+}
+
+.key-exists-info p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.key-date {
+  font-size: 0.9rem;
+  color: #999;
+  font-style: italic;
+}
+
+.info-text {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  border-radius: 4px;
+}
+
+.info-icon {
+  margin-right: 10px;
+  color: #2196f3;
+}

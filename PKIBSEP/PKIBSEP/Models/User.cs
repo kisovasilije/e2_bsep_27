@@ -47,6 +47,11 @@ namespace PKIBSEP.Models
 
         public bool IsActive { get; set; } = true;
 
+        // Password Manager keys
+        public string? PublicKeyPem { get; set; }
+
+        public DateTime? KeyGeneratedAt { get; set; }
+
         public bool VerifyPassword(string password)
         {
             return BCrypt.Net.BCrypt.Verify(password, PasswordHash);

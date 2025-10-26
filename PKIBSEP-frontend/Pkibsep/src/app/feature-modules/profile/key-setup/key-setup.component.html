@@ -1,0 +1,26 @@
+<div class="key-setup-section">
+  <h2>Password Manager - Ključevi</h2>
+
+  <div *ngIf="!hasKey" class="no-key-info">
+    <p>Nemate generisan par ključeva za Password Manager.</p>
+    <p>Da biste koristili Password Manager, prvo morate generisati ključeve.</p>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="generateKeys()"
+      [disabled]="isLoading">
+      <span *ngIf="!isLoading">Generiši Ključeve</span>
+      <span *ngIf="isLoading">Generisanje u toku...</span>
+    </button>
+  </div>
+
+  <div *ngIf="hasKey" class="key-exists-info">
+    <mat-icon class="success-icon">check_circle</mat-icon>
+    <p>Imate generisan par ključeva za Password Manager.</p>
+    <p *ngIf="keyGeneratedAt" class="key-date">Generisano: {{ keyGeneratedAt | date:'dd.MM.yyyy HH:mm' }}</p>
+    <p class="info-text">
+      <mat-icon class="info-icon">info</mat-icon>
+      Privatni ključ je sačuvan lokalno na vašem uređaju. Sistem ne čuva privatni ključ.
+    </p>
+  </div>
+</div>

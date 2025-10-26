@@ -27,6 +27,8 @@ namespace PKIBSEP.Startup
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ISessionService, SessionService>();
+            services.AddScoped<IKeyService, KeyService>();
+            services.AddScoped<IPasswordService, PasswordService>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services, IConfiguration configuration)
@@ -34,6 +36,7 @@ namespace PKIBSEP.Startup
             // Register repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ISessionRepository, SessionRepository>();
+            services.AddScoped<IPasswordRepository, PasswordRepository>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
