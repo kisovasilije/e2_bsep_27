@@ -13,32 +13,42 @@ namespace PKIBSEP.Services;
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
+    private readonly ISessionService _sessionService;
     private readonly JwtOptions _jwtOptions;
 
-    public AuthService(IUserRepository userRepository, IOptions<JwtOptions> jwtOptions)
+    public AuthService(IUserRepository userRepository, ISessionService sessionService, IOptions<JwtOptions> jwtOptions)
     {
         _userRepository = userRepository;
+        _sessionService = sessionService;
         _jwtOptions = jwtOptions.Value;
     }
 
-    public async Task<AuthenticationResponseDto> LoginAsync(UserCredentialsDto userCredentials)
+    public async Task<AuthenticationResponseDto> LoginAsync(AuthenticationDto auth)
     {
-        if (!await VerifyRecaptchaAsync(userCredentials.CaptchaToken))
+        if (!await VerifyRecaptchaAsync(auth.CaptchaToken))
         {
             throw new UnauthorizedAccessException("Invalid captcha");
         }
 
-        var user = await _userRepository.GetByEmailAsync(userCredentials.Email);
+        var user = await _userRepository.GetByEmailAsync(auth.Email);
         if (user == null)
-            throw new KeyNotFoundException($"User with email '{userCredentials.Email}' not found");
+            throw new KeyNotFoundException($"User with email '{auth.Email}' not found");
 
-        if (!user.VerifyPassword(userCredentials.Password))
+        if (!user.VerifyPassword(auth.Password))
             throw new UnauthorizedAccessException("Invalid password");
+
+        var accessToken = GenerateAccessToken(user);
+        auth = auth with { UserId = user.Id, AccessToken = accessToken };
+        var result = await _sessionService.CreateAsync(auth);
+        if (result.IsFailed)
+        {
+            throw new Exception("Failed to create session: " + string.Join(", ", result.Errors.Select(e => e.Message)));
+        }
 
         return new AuthenticationResponseDto
         {
             Email = user.Email,
-            AccessToken = GenerateAccessToken(user)
+            AccessToken = accessToken
         };
     }
 
@@ -75,7 +85,7 @@ public class AuthService : IAuthService
             audience: _jwtOptions.Audience,
             claims: claims,
             notBefore: DateTime.UtcNow,
-            expires: DateTime.UtcNow.AddHours(6),
+            expires: JwtOptions.DefaultExpiresAt,
             signingCredentials: creds
         );
 

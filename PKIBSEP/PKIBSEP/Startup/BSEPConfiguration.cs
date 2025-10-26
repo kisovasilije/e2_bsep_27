@@ -2,6 +2,8 @@
 using PKIBSEP.Database;
 using PKIBSEP.Database.Repository;
 using PKIBSEP.Interfaces;
+using PKIBSEP.Interfaces.Repository;
+using PKIBSEP.Models.Mappers;
 using PKIBSEP.Services;
 
 namespace PKIBSEP.Startup
@@ -12,6 +14,9 @@ namespace PKIBSEP.Startup
         {
             SetupCore(services);
             SetupInfrastructure(services,configuration);
+
+            services.AddAutoMapper(typeof(PkibsepProfile));
+
             return services;
         }
 
@@ -20,13 +25,15 @@ namespace PKIBSEP.Startup
             // Register services
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IAuthService, AuthService>();    
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<ISessionService, SessionService>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services, IConfiguration configuration)
         {
             // Register repositories
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ISessionRepository, SessionRepository>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));

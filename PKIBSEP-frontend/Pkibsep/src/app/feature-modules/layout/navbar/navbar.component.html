@@ -2,33 +2,11 @@
   <div>
     <p>PKIBSEP</p>
     <div id="buttons">
-      <button
-        *ngIf="user && user.email === ''"
-        color="accent"
-        mat-raised-button
-        [routerLink]="['login']"
-      >
-        Login
-      </button>
-      <button
-        *ngIf="user && user.email !== ''"
-        color="accent"
-        mat-raised-button
-        (click)="onLogout()"
-      >
-        Logout
-      </button>
-      <button color="primary" mat-raised-button [routerLink]="['home']">
-        Home
-      </button>
-      <button
-        *ngIf="user && user.role === 'administrator'"
-        color="primary"
-        mat-raised-button
-        [routerLink]="['equipment']"
-      >
-        Manage equipment
-      </button>
+      <button *ngIf="user && user.email === ''" color="accent" mat-raised-button [routerLink]="['login']">Login</button>
+      <button *ngIf="user?.email !== ''" color="primary" mat-raised-button [routerLink]="['profile']">Profile</button>
+      <button *ngIf="user && user.email !== ''" color="accent" mat-raised-button (click)="onLogout()">Logout</button>
+      <button color="primary" mat-raised-button [routerLink]="['home']">Home</button>
+      <button *ngIf="user && user.role === 'administrator'" color="primary" mat-raised-button [routerLink]="['equipment']">Manage equipment</button>
     </div>
   </div>
 </mat-toolbar>

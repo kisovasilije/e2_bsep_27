@@ -4,6 +4,6 @@ namespace PKIBSEP.Interfaces
 {
     public interface IAuthService
     {
-        Task<AuthenticationResponseDto> LoginAsync(UserCredentialsDto userCredentials);
+        Task<AuthenticationResponseDto> LoginAsync(AuthenticationDto auth);
     }
 }

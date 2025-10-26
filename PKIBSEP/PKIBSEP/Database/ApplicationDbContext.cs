@@ -12,6 +12,8 @@ namespace PKIBSEP.Database
 
         public DbSet<User> Users { get; set; }
 
+        public DbSet<Session> Sessions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -24,6 +26,11 @@ namespace PKIBSEP.Database
                 entity.Property(e => e.Role).HasConversion<string>();
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
+
+            // Session entity configuration
+            modelBuilder.Entity<Session>()
+                .HasIndex(s => s.JwtHash)
+                .IsUnique();
         }
     }
 }
