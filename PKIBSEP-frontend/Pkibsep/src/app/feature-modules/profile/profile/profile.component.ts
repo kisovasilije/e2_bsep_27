@@ -42,9 +42,24 @@ export class ProfileComponent implements OnInit {
   protected revokeSession(id: number): void {
     this.sessionService.revokeSession(id).subscribe({
       next: (_) => {
+        this.sessions = this.sessions.filter((s) => s.id !== id);
         this.snackBar.open('Session revoked successfully.', 'Close', { duration: 3000 });
       },
-      error: (err) => {},
+      error: (_) => {
+        this.snackBar.open(`Failed to revoke session`, 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  protected revokeAllSessions(): void {
+    this.sessionService.revokeAllSessions().subscribe({
+      next: (_) => {
+        this.sessions = this.sessions.filter((s) => s.isThisSession);
+        this.snackBar.open('All other sessions revoked successfully.', 'Close', { duration: 3000 });
+      },
+      error: (_) => {
+        this.snackBar.open(`Failed to revoke all sessions`, 'Close', { duration: 3000 });
+      },
     });
   }
 }

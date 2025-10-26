@@ -17,4 +17,8 @@ export class SessionService {
   public revokeSession(id: number): Observable<void> {
     return this.http.patch<void>(`${environment.apiHost}sessions/revoke/${id}`, {});
   }
+
+  public revokeAllSessions(): Observable<void> {
+    return this.http.patch<void>(`${environment.apiHost}sessions/revoke-all`, {});
+  }
 }

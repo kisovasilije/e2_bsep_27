@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PKIBSEP.Common;
 using PKIBSEP.Interfaces;
 using System.Runtime.CompilerServices;
+using System.Security.Claims;
 
 namespace PKIBSEP.Controllers;
 
@@ -62,6 +63,29 @@ public class SessionController : ControllerBase
     public async Task<IActionResult> RevokeSessionById([FromRoute] int id)
     {
         var result = await sessionService.RevokeByIdAsync(id);
+        if (result.IsFailed)
+        {
+            return BadRequest(result.Errors);
+        }
+
+        return NoContent();
+    }
+
+    [HttpPatch("revoke-all")]
+    public async Task<IActionResult> RevokeAllSessions()
+    {
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        {
+            return Unauthorized("User is not authenticated.");
+        }
+
+        var token = Request.GetBearerToken();
+        if (token is null)
+        {
+            return BadRequest("Authorization token is missing.");
+        }
+
+        var result = await sessionService.RevokeAllAsync(userId, token);
         if (result.IsFailed)
         {
             return BadRequest(result.Errors);
