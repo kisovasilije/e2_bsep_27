@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PKIBSEP.Common;
 using PKIBSEP.Interfaces;
+using System.Runtime.CompilerServices;
 
 namespace PKIBSEP.Controllers;
 
@@ -49,6 +50,18 @@ public class SessionController : ControllerBase
         }
 
         var result = await sessionService.RevokeCurrentSessionAsync(token);
+        if (result.IsFailed)
+        {
+            return BadRequest(result.Errors);
+        }
+
+        return NoContent();
+    }
+
+    [HttpPatch("revoke/{id:int:min(1)}")]
+    public async Task<IActionResult> RevokeSessionById([FromRoute] int id)
+    {
+        var result = await sessionService.RevokeByIdAsync(id);
         if (result.IsFailed)
         {
             return BadRequest(result.Errors);

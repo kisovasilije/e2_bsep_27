@@ -18,4 +18,6 @@ public interface ISessionService
     Task<Result> RevokeCurrentSessionAsync(string token);
 
     Task<Result> ValidateSessionAsync(string token);
+
+    Task<Result> RevokeByIdAsync(int id);
 }
