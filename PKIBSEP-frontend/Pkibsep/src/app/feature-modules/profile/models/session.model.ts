@@ -3,5 +3,6 @@ export interface Session {
   readonly userId: number;
   readonly ipAddress: string;
   readonly userAgent: string;
+  readonly isThisSession: boolean;
   readonly lastActive: Date;
 }

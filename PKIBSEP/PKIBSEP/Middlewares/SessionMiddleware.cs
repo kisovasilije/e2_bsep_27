@@ -1,4 +1,5 @@
-﻿using PKIBSEP.Interfaces;
+﻿using PKIBSEP.Common;
+using PKIBSEP.Interfaces;
 
 namespace PKIBSEP.Middlewares;
 
@@ -6,14 +7,11 @@ public class SessionMiddleware
 {
     private readonly RequestDelegate next;
 
-    //private readonly ISessionService service;
-
-    private ILogger<SessionMiddleware> logger;
+    private readonly ILogger<SessionMiddleware> logger;
 
     public SessionMiddleware(RequestDelegate next, ILogger<SessionMiddleware> logger)
     {
         this.next = next;
-        //this.service = service;
         this.logger = logger;
     }
 
@@ -21,12 +19,11 @@ public class SessionMiddleware
     {
         var service = ctx.RequestServices.GetRequiredService<ISessionService>();
 
-        var header = ctx.Request.Headers["Authorization"].ToString();
-        var token = header.Substring("Bearer ".Length);
+        var token = ctx.Request.GetBearerToken();
 
-        if (!string.IsNullOrEmpty(token) && !token.Equals("null"))
+        if (token != null)
         {
-            var result = await service.ValidateSessionAsync(header.Substring("Bearer ".Length).Trim());
+            var result = await service.ValidateSessionAsync(token);
             if (result.IsFailed)
             {
                 logger.LogWarning("Session validation failed: {Errors}", string.Join(", ", result.Errors.Select(e => e.Message)));

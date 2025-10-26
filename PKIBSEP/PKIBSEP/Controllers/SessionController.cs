@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PKIBSEP.Common;
 using PKIBSEP.Interfaces;
 
 namespace PKIBSEP.Controllers;
@@ -23,7 +24,13 @@ public class SessionController : ControllerBase
     [HttpGet("{userId:int:min(1)}")]
     public async Task<IActionResult> GetByUserId([FromRoute] int userId)
     {
-        var result = await sessionService.GetByUserIdAsync(userId);
+        var token = Request.GetBearerToken();
+        if (token is null)
+        {
+            return BadRequest("Authorization token is missing.");
+        }
+
+        var result = await sessionService.GetByUserIdAsync(userId, token);
         if (result.IsFailed)
         {
             return BadRequest(result.Errors);
@@ -35,8 +42,8 @@ public class SessionController : ControllerBase
     [HttpPatch("revoke-current-session")]
     public async Task<IActionResult> RevokeCurrentSession()
     {
-        var token = GetBearerToken();
-        if (string.IsNullOrEmpty(token))
+        var token = Request.GetBearerToken();
+        if (token is null)
         {
             return BadRequest("Authorization token is missing.");
         }
@@ -48,16 +55,5 @@ public class SessionController : ControllerBase
         }
 
         return NoContent();
-    }
-
-    private string GetBearerToken()
-    {
-        var authHeader = Request.Headers["Authorization"].ToString();
-        if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
-        {
-            return string.Empty;
-        }
-
-        return authHeader.Substring("Bearer ".Length).Trim();
     }
 }

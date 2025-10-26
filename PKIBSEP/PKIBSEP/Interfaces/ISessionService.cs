@@ -13,7 +13,7 @@ public interface ISessionService
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
-    Task<Result<IEnumerable<SessionDto>>> GetByUserIdAsync(int userId);
+    Task<Result<IEnumerable<SessionDto>>> GetByUserIdAsync(int userId, string token);
 
     Task<Result> RevokeCurrentSessionAsync(string token);
 

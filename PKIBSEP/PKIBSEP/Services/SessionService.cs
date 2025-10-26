@@ -45,19 +45,23 @@ public class SessionService : ISessionService
         }
     }
 
-    public async Task<Result<IEnumerable<SessionDto>>> GetByUserIdAsync(int userId)
+    public async Task<Result<IEnumerable<SessionDto>>> GetByUserIdAsync(int userId, string token)
     {
-        IEnumerable<Session> sessions;
+        IEnumerable<SessionDto> response;
         try
         {
-            sessions = await sessionRepository.GetByUserIdAsync(userId);
+            var sessions = await sessionRepository.GetByUserIdAsync(userId);
+            var current = sessions.FirstOrDefault(s => s.JwtHash.SequenceEqual(GetJwtHash(token)));
+            response = mapper.Map<IEnumerable<SessionDto>>(sessions);
+            var currentResponse = response.FirstOrDefault(s => s.Id == current?.Id);
+            currentResponse.IsThisSession = true;
         }
         catch (Exception ex)
         {
             return Result.Fail(ex.Message);
         }
         
-        return Result.Ok(mapper.Map<IEnumerable<SessionDto>>(sessions));
+        return Result.Ok(response);
     }
 
     public async Task<Result> RevokeCurrentSessionAsync(string token)

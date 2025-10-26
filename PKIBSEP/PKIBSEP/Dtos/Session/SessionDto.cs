@@ -1,8 +1,16 @@
 ﻿namespace PKIBSEP.Dtos.Session;
 
-public record SessionDto(
-    int Id,
-    int UserId,
-    string IpAddress,
-    string UserAgent,
-    DateTime LastActive);
+public class SessionDto
+{
+    public int Id { get; set; }
+
+    public int UserId { get; set; }
+
+    public string IpAddress { get; set; }
+
+    public string UserAgent { get; set; }
+
+    public bool IsThisSession { get; set; }
+
+    public DateTime LastActive { get; set; }
+}

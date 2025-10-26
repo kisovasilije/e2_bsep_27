@@ -4,8 +4,14 @@
   <div class="session-card" *ngFor="let s of sessions">
     <div class="content">
       <h2>{{ s.userAgent }}</h2>
-      <p>{{ s.ipAddress }}</p>
-      <p>{{ s.lastActive }}</p>
+      <ng-container *ngIf="s.isThisSession">
+        <p>This Session</p>
+        <p [style.visibility]="'hidden'">Placeholder</p>
+      </ng-container>
+      <ng-container *ngIf="!s.isThisSession">
+        <p>{{ s.ipAddress }}</p>
+        <p>{{ s.lastActive }}</p>
+      </ng-container>
     </div>
     <div class="session-card-end">
       <button mat-raised-button color="primary" (click)="revokeSession(s.id)">Revoke</button>

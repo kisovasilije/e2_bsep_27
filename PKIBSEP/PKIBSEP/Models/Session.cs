@@ -2,7 +2,7 @@
 
 public class Session
 {
-    private static readonly TimeSpan threshold = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan threshold = TimeSpan.FromMinutes(5);
 
     public int Id { get; init; }
 
@@ -15,7 +15,7 @@ public class Session
     public bool IsRevoked { get; private set; } = false;
 
     public string IpAddress { get; private set; }
-
+    
     public string UserAgent { get; private set; }
 
     public DateTime LastActive { get; private set; } = DateTime.UtcNow;
