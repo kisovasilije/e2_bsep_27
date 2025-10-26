@@ -1,0 +1,28 @@
+div.sessions-container {
+  padding: 1em;
+  background-color: #eee;
+  border-radius: 0.5em;
+}
+
+div.session-card {
+  display: flex;
+
+  border-bottom: 1px solid #ccc;
+}
+
+div.content {
+  flex: 1;
+}
+
+div.session-card-end {
+  flex: 0 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+button.revoke-all-sessions {
+  width: 100%;
+  margin-top: 1em;
+}

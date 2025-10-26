@@ -1,0 +1,21 @@
+<h1>Where You're Logged In</h1>
+<p>These are all the places you're currently logged into your account.</p>
+<div class="sessions-container">
+  <div class="session-card" *ngFor="let s of sessions">
+    <div class="content">
+      <h2>{{ s.userAgent }}</h2>
+      <ng-container *ngIf="s.isThisSession">
+        <p>This Session</p>
+        <p [style.visibility]="'hidden'">Placeholder</p>
+      </ng-container>
+      <ng-container *ngIf="!s.isThisSession">
+        <p>{{ s.ipAddress }}</p>
+        <p>{{ s.lastActive }}</p>
+      </ng-container>
+    </div>
+    <div class="session-card-end">
+      <button mat-raised-button color="primary" (click)="revokeSession(s.id)">Revoke</button>
+    </div>
+  </div>
+</div>
+<button class="revoke-all-sessions" mat-raised-button color="primary" (click)="revokeAllSessions()">Revoke All Sessions</button>

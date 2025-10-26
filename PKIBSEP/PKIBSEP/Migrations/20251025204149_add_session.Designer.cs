@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PKIBSEP.Database;
@@ -11,9 +12,11 @@ using PKIBSEP.Database;
 namespace PKIBSEP.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251025204149_add_session")]
+    partial class add_session
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,11 +58,6 @@ namespace PKIBSEP.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("JwtHash")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Sessions");
                 });
@@ -133,17 +131,6 @@ namespace PKIBSEP.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("PKIBSEP.Models.Session", b =>
-                {
-                    b.HasOne("PKIBSEP.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

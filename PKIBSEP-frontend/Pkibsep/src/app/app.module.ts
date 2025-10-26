@@ -16,6 +16,7 @@ import { AuthModule } from './infrastructure/auth/auth.module';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { JwtInterceptor } from './infrastructure/auth/jwt/jwt.interceptor';
 import { RecaptchaModule } from 'ng-recaptcha';
+import { ProfileModule } from './feature-modules/profile/profile.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -33,6 +34,7 @@ import { RecaptchaModule } from 'ng-recaptcha';
     AuthModule,
     HttpClientModule,
     RecaptchaModule,
+    ProfileModule,
   ],
   providers: [
     {
