@@ -22,4 +22,29 @@ public class SessionRepository : ISessionRepository
         await context.SaveChangesAsync();
         return session;
     }
+
+    public async Task<IEnumerable<Session>> GetByUserIdAsync(int userId)
+    {
+        return await sessions.Where(s => s.UserId == userId && !s.IsRevoked).ToListAsync();
+    }
+
+    public async Task<bool> RevokeCurrentSessionAsync(byte[] jwtHash)
+    {
+        try
+        {
+            var session = await sessions.FirstOrDefaultAsync(s => s.JwtHash.SequenceEqual(jwtHash) && !s.IsRevoked);
+            if (session is null)
+            {
+                return false;
+            }
+
+            session.Revoke();
+            await context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
 }

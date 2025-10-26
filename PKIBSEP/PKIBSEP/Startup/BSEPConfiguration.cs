@@ -3,6 +3,7 @@ using PKIBSEP.Database;
 using PKIBSEP.Database.Repository;
 using PKIBSEP.Interfaces;
 using PKIBSEP.Interfaces.Repository;
+using PKIBSEP.Models.Mappers;
 using PKIBSEP.Services;
 
 namespace PKIBSEP.Startup
@@ -13,6 +14,9 @@ namespace PKIBSEP.Startup
         {
             SetupCore(services);
             SetupInfrastructure(services,configuration);
+
+            services.AddAutoMapper(typeof(PkibsepProfile));
+
             return services;
         }
 

@@ -16,41 +16,35 @@ import { Registration } from './model/registration.model';
 export class AuthService {
   user$ = new BehaviorSubject<User>({ email: '', id: 0, role: '' });
 
-  constructor(
-    private http: HttpClient,
-    private tokenStorage: TokenStorage,
-    private router: Router
-  ) {}
+  constructor(private http: HttpClient, private tokenStorage: TokenStorage, private router: Router) {}
 
   login(login: Login): Observable<AuthenticationResponse> {
-    return this.http
-      .post<AuthenticationResponse>(
-        environment.apiHost + 'authentication/login',
-        login
-      )
-      .pipe(
-        tap((authenticationResponse) => {
-          this.tokenStorage.saveAccessToken(authenticationResponse.accessToken);
-          this.setUser();
-        })
-      );
+    return this.http.post<AuthenticationResponse>(environment.apiHost + 'authentication/login', login).pipe(
+      tap((authenticationResponse) => {
+        this.tokenStorage.saveAccessToken(authenticationResponse.accessToken);
+        this.setUser();
+      })
+    );
   }
 
   register(registration: Registration): Observable<AuthenticationResponse> {
-    return this.http
-      .post<AuthenticationResponse>(environment.apiHost + 'users', registration)
-      .pipe(
-        tap((authenticationResponse) => {
-          this.tokenStorage.saveAccessToken(authenticationResponse.accessToken);
-          this.setUser();
-        })
-      );
+    return this.http.post<AuthenticationResponse>(environment.apiHost + 'users', registration).pipe(
+      tap((authenticationResponse) => {
+        this.tokenStorage.saveAccessToken(authenticationResponse.accessToken);
+        this.setUser();
+      })
+    );
   }
 
   logout(): void {
     this.router.navigate(['/home']).then((_) => {
-      this.tokenStorage.clear();
-      this.user$.next({ email: '', id: 0, role: '' });
+      this.http.patch(`${environment.apiHost}sessions/revoke-current-session`, {}).subscribe({
+        next: (_) => {
+          this.tokenStorage.clear();
+          this.user$.next({ email: '', id: 0, role: '' });
+        },
+        error: (err) => alert(err.message),
+      });
     });
   }
 

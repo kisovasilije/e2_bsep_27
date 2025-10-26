@@ -1,1 +1,15 @@
-<p>profile works!</p>
+<h1>Where You're Logged In</h1>
+<p>These are all the places you're currently logged into your account.</p>
+<div class="sessions-container">
+  <div class="session-card" *ngFor="let s of sessions">
+    <div class="content">
+      <h2>{{ s.userAgent }}</h2>
+      <p>{{ s.ipAddress }}</p>
+      <p>{{ s.lastActive }}</p>
+    </div>
+    <div class="session-card-end">
+      <button mat-raised-button color="primary">Revoke</button>
+    </div>
+  </div>
+</div>
+<button class="revoke-all-sessions" mat-raised-button color="primary">Revoke All Sessions</button>

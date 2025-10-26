@@ -28,4 +28,9 @@ public class Session
         IpAddress = ipAddress;
         UserAgent = userAgent;
     }
+
+    public void Revoke()
+    {
+        IsRevoked = true;
+    }
 }

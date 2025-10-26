@@ -1,6 +1,9 @@
-﻿using FluentResults;
+﻿using AutoMapper;
+using FluentResults;
+using Microsoft.AspNetCore.Http.HttpResults;
 using PKIBSEP.Common;
 using PKIBSEP.Dtos;
+using PKIBSEP.Dtos.Session;
 using PKIBSEP.Interfaces;
 using PKIBSEP.Interfaces.Repository;
 using PKIBSEP.Models;
@@ -13,17 +16,23 @@ public class SessionService : ISessionService
 {
     private readonly ISessionRepository sessionRepository;
 
-    public SessionService(ISessionRepository sessionRepository)
+    private readonly IMapper mapper;
+
+    public SessionService(ISessionRepository sessionRepository, IMapper mapper)
     {
         this.sessionRepository = sessionRepository;
+        this.mapper = mapper;
+    }
+
+    private static byte[] GetJwtHash(string jwt)
+    {
+        using var sha = SHA256.Create();
+        return sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(jwt));
     }
 
     public async Task<Result> CreateAsync(AuthenticationDto auth)
     {
-        using var sha = SHA256.Create();
-        var jwtHash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(auth.AccessToken));
-
-        var session = new Session(auth.UserId, jwtHash, JwtOptions.DefaultExpiresAt, auth.IpAddress, auth.UserAgent);
+        var session = new Session(auth.UserId, GetJwtHash(auth.AccessToken), JwtOptions.DefaultExpiresAt, auth.IpAddress, auth.UserAgent);
 
         try
         {
@@ -33,6 +42,33 @@ public class SessionService : ISessionService
         catch (Exception ex)
         {
             return Result.Fail(ex.Message);
+        }
+    }
+
+    public async Task<Result<IEnumerable<SessionDto>>> GetByUserIdAsync(int userId)
+    {
+        IEnumerable<Session> sessions;
+        try
+        {
+            sessions = await sessionRepository.GetByUserIdAsync(userId);
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(ex.Message);
+        }
+        
+        return Result.Ok(mapper.Map<IEnumerable<SessionDto>>(sessions));
+    }
+
+    public async Task<Result> RevokeCurrentSessionAsync(string token)
+    {
+        if (await sessionRepository.RevokeCurrentSessionAsync(GetJwtHash(token)))
+        {
+            return Result.Ok();
+        }
+        else
+        {
+            return Result.Fail("Failed to revoke session.");
         }
     }
 }
