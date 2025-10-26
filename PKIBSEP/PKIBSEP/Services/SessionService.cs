@@ -110,4 +110,20 @@ public class SessionService : ISessionService
         await sessionRepository.SaveChangesAsync();
         return Result.Ok();
     }
+
+    public async Task<Result> RevokeAllAsync(int userId, string token)
+    {
+        var sessions = await sessionRepository.GetByUserIdAsync(userId);
+        foreach (var session in sessions)
+        {
+            if (session.JwtHash.SequenceEqual(GetJwtHash(token)))
+            {
+                continue;
+            }
+            session.Revoke();
+        }
+
+        await sessionRepository.SaveChangesAsync();
+        return Result.Ok();
+    }
 }
