@@ -19,6 +19,11 @@ const routes: Routes = [
   {
     path: 'profile',
     component: ProfileComponent
+  },
+  {
+    path: 'password-manager',
+    loadChildren: () => import('../../feature-modules/password-manager/password-manager.module').then(m => m.PasswordManagerModule),
+    canActivate: [AuthGuard]
   }
 ];
 
