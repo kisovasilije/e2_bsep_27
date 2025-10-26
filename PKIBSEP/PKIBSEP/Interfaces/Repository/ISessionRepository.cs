@@ -14,4 +14,8 @@ public interface ISessionRepository
     Task<IEnumerable<Session>> GetByUserIdAsync(int userId);
 
     Task<bool> RevokeCurrentSessionAsync(byte[] jwtHash);
+
+    Task<Session?> GetByJwtHashAsync(byte[] jwtHash);
+
+    Task SaveChangesAsync();
 }

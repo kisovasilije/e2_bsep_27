@@ -2,6 +2,8 @@
 
 public class Session
 {
+    private static readonly TimeSpan threshold = TimeSpan.FromSeconds(5);
+
     public int Id { get; init; }
 
     public int UserId { get; init; }
@@ -32,5 +34,15 @@ public class Session
     public void Revoke()
     {
         IsRevoked = true;
+    }
+
+    public bool ShouldUpdateLastActive()
+    {
+        return (DateTime.UtcNow - LastActive) > threshold;
+    }
+
+    public void UpdateLastActive()
+    {
+        LastActive = DateTime.UtcNow;
     }
 }

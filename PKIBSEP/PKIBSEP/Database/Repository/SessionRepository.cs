@@ -47,4 +47,14 @@ public class SessionRepository : ISessionRepository
             return false;
         }
     }
+
+    public async Task<Session?> GetByJwtHashAsync(byte[] jwtHash)
+    {
+        return await sessions.FirstOrDefaultAsync(s => s.JwtHash.SequenceEqual(jwtHash));
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await context.SaveChangesAsync();
+    }
 }

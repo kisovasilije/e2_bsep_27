@@ -16,4 +16,6 @@ public interface ISessionService
     Task<Result<IEnumerable<SessionDto>>> GetByUserIdAsync(int userId);
 
     Task<Result> RevokeCurrentSessionAsync(string token);
+
+    Task<Result> ValidateSessionAsync(string token);
 }

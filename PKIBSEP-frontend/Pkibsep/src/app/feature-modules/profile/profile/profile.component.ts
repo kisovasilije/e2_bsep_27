@@ -35,4 +35,6 @@ export class ProfileComponent implements OnInit {
       this.sessions = sessions;
     });
   }
+
+  protected revokeSession(id: number): void {}
 }

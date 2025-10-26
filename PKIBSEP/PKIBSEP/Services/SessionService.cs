@@ -71,4 +71,26 @@ public class SessionService : ISessionService
             return Result.Fail("Failed to revoke session.");
         }
     }
+
+    public async Task<Result> ValidateSessionAsync(string token)
+    {
+        var session = await sessionRepository.GetByJwtHashAsync(GetJwtHash(token));
+        if (session is null)
+        {
+            return Result.Fail("Session not found.");
+        }
+
+        if (session.IsRevoked)
+        {
+            return Result.Fail("Session is revoked.");
+        }
+
+        if (session.ShouldUpdateLastActive())
+        {
+            session.UpdateLastActive();
+            await sessionRepository.SaveChangesAsync();
+        }
+
+        return Result.Ok();
+    }
 }

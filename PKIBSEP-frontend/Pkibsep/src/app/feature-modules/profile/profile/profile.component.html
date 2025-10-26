@@ -8,7 +8,7 @@
       <p>{{ s.lastActive }}</p>
     </div>
     <div class="session-card-end">
-      <button mat-raised-button color="primary">Revoke</button>
+      <button mat-raised-button color="primary" (click)="revokeSession(s.id)">Revoke</button>
     </div>
   </div>
 </div>

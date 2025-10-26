@@ -13,4 +13,8 @@ export class SessionService {
   public getByUserId(userId: number): Observable<Session[]> {
     return this.http.get<Session[]>(`${environment.apiHost}sessions/${userId}`);
   }
+
+  // public revokeSession(id: number): Observable<void> {
+  //   return this.http.delete<void>(`${environment.apiHost}sessions/revoke/${id}`);
+  // }
 }
