@@ -97,4 +97,17 @@ public class SessionService : ISessionService
 
         return Result.Ok();
     }
+
+    public async Task<Result> RevokeByIdAsync(int id)
+    {
+        var session = await sessionRepository.GetByIdAsync(id);
+        if (session is null)
+        {
+            return Result.Fail("Session does not exist.");
+        }
+
+        session.Revoke();
+        await sessionRepository.SaveChangesAsync();
+        return Result.Ok();
+    }
 }

@@ -18,4 +18,6 @@ public interface ISessionRepository
     Task<Session?> GetByJwtHashAsync(byte[] jwtHash);
 
     Task SaveChangesAsync();
+
+    Task<Session?> GetByIdAsync(int id);
 }

@@ -57,4 +57,9 @@ public class SessionRepository : ISessionRepository
     {
         await context.SaveChangesAsync();
     }
+
+    public async Task<Session?> GetByIdAsync(int id)
+    {
+        return await sessions.FirstOrDefaultAsync(s => s.Id == id);
+    }
 }
