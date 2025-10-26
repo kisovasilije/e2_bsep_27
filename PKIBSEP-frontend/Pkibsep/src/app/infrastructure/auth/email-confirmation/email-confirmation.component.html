@@ -1,0 +1,24 @@
+<div style="max-width: 600px; margin: 50px auto; padding: 20px; text-align: center;">
+  <div *ngIf="isLoading">
+    <mat-spinner style="margin: 0 auto;"></mat-spinner>
+    <p style="margin-top: 20px;">Verifying your email...</p>
+  </div>
+
+  <div *ngIf="!isLoading && success" style="color: green;">
+    <mat-icon style="font-size: 64px; width: 64px; height: 64px;">check_circle</mat-icon>
+    <h2>Email Verified Successfully!</h2>
+    <p>{{ message }}</p>
+    <button mat-raised-button color="primary" (click)="navigateToLogin()" style="margin-top: 20px;">
+      Go to Login
+    </button>
+  </div>
+
+  <div *ngIf="!isLoading && !success" style="color: red;">
+    <mat-icon style="font-size: 64px; width: 64px; height: 64px;">error</mat-icon>
+    <h2>Verification Failed</h2>
+    <p>{{ message }}</p>
+    <button mat-raised-button color="primary" (click)="navigateToLogin()" style="margin-top: 20px;">
+      Go to Login
+    </button>
+  </div>
+</div>

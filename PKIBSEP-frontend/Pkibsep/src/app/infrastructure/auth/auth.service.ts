@@ -9,6 +9,7 @@ import { Login } from './model/login.model';
 import { AuthenticationResponse } from './model/authentication-response.model';
 import { User } from './model/user.model';
 import { Registration } from './model/registration.model';
+import { RegisterResponse } from './model/register-response.model';
 
 @Injectable({
   providedIn: 'root',
@@ -36,15 +37,16 @@ export class AuthService {
       );
   }
 
-  register(registration: Registration): Observable<AuthenticationResponse> {
+  register(registration: Registration): Observable<RegisterResponse> {
     return this.http
-      .post<AuthenticationResponse>(environment.apiHost + 'users', registration)
-      .pipe(
-        tap((authenticationResponse) => {
-          this.tokenStorage.saveAccessToken(authenticationResponse.accessToken);
-          this.setUser();
-        })
-      );
+      .post<RegisterResponse>(environment.apiHost + 'user/register', registration);
+  }
+
+  confirmEmail(token: string): Observable<{success: boolean, message: string}> {
+    return this.http
+      .get<{success: boolean, message: string}>(environment.apiHost + 'user/confirm-email', {
+        params: { token }
+      });
   }
 
   logout(): void {

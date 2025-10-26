@@ -5,11 +5,13 @@ import { LoginComponent } from '../auth/login/login.component';
 import { EquipmentComponent } from 'src/app/feature-modules/administration/equipment/equipment.component';
 import { AuthGuard } from '../auth/auth.guard';
 import { RegistrationComponent } from '../auth/registration/registration.component';
+import { EmailConfirmationComponent } from '../auth/email-confirmation/email-confirmation.component';
 
 const routes: Routes = [
   {path: 'home', component: HomeComponent},
   {path: 'login', component: LoginComponent},
   {path: 'register', component: RegistrationComponent},
+  {path: 'confirm-email', component: EmailConfirmationComponent},
   {path: 'equipment', component: EquipmentComponent, canActivate: [AuthGuard],}
 ];
 
