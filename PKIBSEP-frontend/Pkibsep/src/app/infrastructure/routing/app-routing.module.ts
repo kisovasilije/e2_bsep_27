@@ -7,12 +7,14 @@ import { AuthGuard } from '../auth/auth.guard';
 import { RegistrationComponent } from '../auth/registration/registration.component';
 import { ProfileComponent } from 'src/app/feature-modules/profile/profile/profile.component';
 import { EmailConfirmationComponent } from '../auth/email-confirmation/email-confirmation.component';
+import { PasswordResetComponent } from '../auth/password-reset/password-reset.component';
 
 const routes: Routes = [
   {path: 'home', component: HomeComponent},
   {path: 'login', component: LoginComponent},
   {path: 'register', component: RegistrationComponent},
   {path: 'confirm-email', component: EmailConfirmationComponent},
+  {path: 'reset-password', component: PasswordResetComponent},
   {path: 'equipment', component: EquipmentComponent, canActivate: [AuthGuard],},
   {
     path: 'profile',

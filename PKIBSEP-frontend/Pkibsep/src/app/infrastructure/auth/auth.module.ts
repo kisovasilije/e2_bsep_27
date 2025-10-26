@@ -5,6 +5,7 @@ import { MaterialModule } from '../material/material.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RegistrationComponent } from './registration/registration.component';
 import { EmailConfirmationComponent } from './email-confirmation/email-confirmation.component';
+import { PasswordResetComponent } from './password-reset/password-reset.component';
 import { RecaptchaModule } from "ng-recaptcha";
 
 
@@ -13,7 +14,8 @@ import { RecaptchaModule } from "ng-recaptcha";
   declarations: [
     LoginComponent,
     RegistrationComponent,
-    EmailConfirmationComponent
+    EmailConfirmationComponent,
+    PasswordResetComponent
   ],
   imports: [
     CommonModule,

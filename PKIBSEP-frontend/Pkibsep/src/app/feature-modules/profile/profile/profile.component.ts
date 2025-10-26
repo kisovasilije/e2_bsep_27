@@ -62,4 +62,20 @@ export class ProfileComponent implements OnInit {
       },
     });
   }
+
+  protected requestPasswordRecovery(): void {
+    if (!this.user?.email) {
+      this.snackBar.open('User email not found', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.authService.requestPasswordRecovery({ email: this.user.email }).subscribe({
+      next: (response) => {
+        this.snackBar.open(response.message || 'Password recovery email sent. Please check your inbox.', 'Close', { duration: 5000 });
+      },
+      error: (err) => {
+        this.snackBar.open(err.error?.message || 'Failed to send password recovery email', 'Close', { duration: 3000 });
+      },
+    });
+  }
 }

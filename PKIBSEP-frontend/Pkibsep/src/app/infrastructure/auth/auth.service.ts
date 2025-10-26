@@ -10,6 +10,8 @@ import { AuthenticationResponse } from './model/authentication-response.model';
 import { User } from './model/user.model';
 import { Registration } from './model/registration.model';
 import { RegisterResponse } from './model/register-response.model';
+import { PasswordRecoveryRequest } from './model/password-recovery-request.model';
+import { PasswordReset } from './model/password-reset.model';
 
 @Injectable({
   providedIn: 'root',
@@ -38,6 +40,16 @@ export class AuthService {
       .get<{success: boolean, message: string}>(environment.apiHost + 'user/confirm-email', {
         params: { token }
       });
+  }
+
+  requestPasswordRecovery(request: PasswordRecoveryRequest): Observable<{success: boolean, message: string}> {
+    return this.http
+      .post<{success: boolean, message: string}>(environment.apiHost + 'user/forgot-password', request);
+  }
+
+  resetPassword(passwordReset: PasswordReset): Observable<{success: boolean, message: string}> {
+    return this.http
+      .post<{success: boolean, message: string}>(environment.apiHost + 'user/reset-password', passwordReset);
   }
 
   logout(): void {
