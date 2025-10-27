@@ -6,6 +6,8 @@ import { KeyService } from 'src/app/infrastructure/password-manager/key.service'
 import { PasswordEntry } from 'src/app/infrastructure/password-manager/model/password-entry.model';
 import { AddPasswordComponent } from '../add-password/add-password.component';
 import { ViewPasswordComponent } from '../view-password/view-password.component';
+import { SharePasswordComponent } from '../share-password/share-password.component';
+import { ViewSharesComponent } from '../view-shares/view-shares.component';
 
 @Component({
   selector: 'xp-password-list',
@@ -118,5 +120,35 @@ export class PasswordListComponent implements OnInit {
         },
       });
     }
+  }
+
+  sharePassword(password: PasswordEntry): void {
+    if (!password.isOwner) {
+      this.snackBar.open('Samo vlasnik može da deli lozinku', 'Zatvori', { duration: 3000 });
+      return;
+    }
+
+    const dialogRef = this.dialog.open(SharePasswordComponent, {
+      width: '600px',
+      data: password,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadPasswords(); // Refresh lista
+      }
+    });
+  }
+
+  viewShares(password: PasswordEntry): void {
+    if (!password.isOwner) {
+      this.snackBar.open('Samo vlasnik može videti sa kim je lozinka podeljena', 'Zatvori', { duration: 3000 });
+      return;
+    }
+
+    this.dialog.open(ViewSharesComponent, {
+      width: '600px',
+      data: password,
+    });
   }
 }

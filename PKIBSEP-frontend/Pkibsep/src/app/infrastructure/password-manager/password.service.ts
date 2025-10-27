@@ -5,6 +5,9 @@ import { environment } from 'src/env/environment';
 import { SavePassword } from './model/save-password.model';
 import { PasswordEntry } from './model/password-entry.model';
 import { UpdatePassword } from './model/update-password.model';
+import { SharePassword } from './model/share-password.model';
+import { RegularUser } from './model/regular-user.model';
+import { SharedUser } from './model/shared-user.model';
 
 @Injectable({
   providedIn: 'root',
@@ -51,5 +54,29 @@ export class PasswordService {
    */
   deletePassword(id: number): Observable<{ success: boolean; message: string }> {
     return this.http.delete<{ success: boolean; message: string }>(`${environment.apiHost}password/${id}`);
+  }
+
+  /**
+   * Preuzimanje liste dostupnih korisnika za deljenje lozinke
+   */
+  getAvailableUsersForSharing(passwordId: number): Observable<RegularUser[]> {
+    return this.http.get<RegularUser[]>(`${environment.apiHost}password/${passwordId}/available-users`);
+  }
+
+  /**
+   * Deljenje lozinke sa drugim korisnikom
+   */
+  sharePassword(passwordId: number, shareData: SharePassword): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${environment.apiHost}password/${passwordId}/share`,
+      shareData
+    );
+  }
+
+  /**
+   * Preuzimanje liste korisnika sa kojima je lozinka podeljena
+   */
+  getPasswordShares(passwordId: number): Observable<SharedUser[]> {
+    return this.http.get<SharedUser[]>(`${environment.apiHost}password/${passwordId}/shares`);
   }
 }

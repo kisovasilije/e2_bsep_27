@@ -22,11 +22,15 @@ namespace PKIBSEP.Database.Repository
                 .Where(pe => pe.OwnerId == userId)
                 .ToListAsync();
 
-            var sharedPasswords = await _context.PasswordShares
-                .Include(ps => ps.PasswordEntry)
-                    .ThenInclude(pe => pe.Owner)
+            var sharedPasswordIds = await _context.PasswordShares
                 .Where(ps => ps.UserId == userId && ps.PasswordEntry.OwnerId != userId)
-                .Select(ps => ps.PasswordEntry)
+                .Select(ps => ps.PasswordEntryId)
+                .ToListAsync();
+
+            var sharedPasswords = await _context.PasswordEntries
+                .Include(pe => pe.Owner)
+                .Include(pe => pe.Shares)
+                .Where(pe => sharedPasswordIds.Contains(pe.Id))
                 .ToListAsync();
 
             // Kombinuj owned i shared passwords

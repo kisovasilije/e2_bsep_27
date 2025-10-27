@@ -13,11 +13,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatSelectModule } from '@angular/material/select';
 
 // Components
 import { PasswordListComponent } from './password-list/password-list.component';
 import { AddPasswordComponent } from './add-password/add-password.component';
 import { ViewPasswordComponent } from './view-password/view-password.component';
+import { SharePasswordComponent } from './share-password/share-password.component';
+import { ViewSharesComponent } from './view-shares/view-shares.component';
 
 const routes: Routes = [
   {
@@ -31,6 +34,8 @@ const routes: Routes = [
     PasswordListComponent,
     AddPasswordComponent,
     ViewPasswordComponent,
+    SharePasswordComponent,
+    ViewSharesComponent,
   ],
   imports: [
     CommonModule,
@@ -46,6 +51,7 @@ const routes: Routes = [
     MatTooltipModule,
     MatProgressSpinnerModule,
     MatDividerModule,
+    MatSelectModule,
   ],
 })
 export class PasswordManagerModule {}
