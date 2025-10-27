@@ -72,5 +72,20 @@ namespace PKIBSEP.Database.Repository
             return await _context.PasswordShares
                 .FirstOrDefaultAsync(ps => ps.PasswordEntryId == entryId && ps.UserId == userId);
         }
+
+        public async Task<PasswordShare> AddPasswordShareAsync(PasswordShare share)
+        {
+            _context.PasswordShares.Add(share);
+            await _context.SaveChangesAsync();
+            return share;
+        }
+
+        public async Task<List<PasswordShare>> GetPasswordSharesAsync(int entryId)
+        {
+            return await _context.PasswordShares
+                .Include(ps => ps.User)
+                .Where(ps => ps.PasswordEntryId == entryId)
+                .ToListAsync();
+        }
     }
 }

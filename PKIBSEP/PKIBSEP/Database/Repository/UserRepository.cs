@@ -54,5 +54,12 @@ namespace PKIBSEP.Database.Repository
         {
             return await _context.Users.AnyAsync(u => u.Email == email);
         }
+
+        public async Task<List<User>> GetRegularUsersWithKeysAsync()
+        {
+            return await _context.Users
+                .Where(u => u.Role == Enums.UserRole.RegularUser && u.PublicKeyPem != null)
+                .ToListAsync();
+        }
     }
 }
