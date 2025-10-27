@@ -130,5 +130,61 @@ namespace PKIBSEP.Controllers
 
             return Ok(new { success, message });
         }
+
+        /// <summary>
+        /// Preuzimanje liste dostupnih korisnika za deljenje lozinke
+        /// </summary>
+        [HttpGet("{id}/available-users")]
+        public async Task<IActionResult> GetAvailableUsersForSharing([FromRoute] int id)
+        {
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+            {
+                return Unauthorized(new { message = "Korisnik nije autentifikovan" });
+            }
+
+            var users = await _passwordService.GetAvailableUsersForSharingAsync(userId, id);
+            return Ok(users);
+        }
+
+        /// <summary>
+        /// Deljenje lozinke sa drugim korisnikom
+        /// </summary>
+        [HttpPost("{id}/share")]
+        public async Task<IActionResult> SharePassword([FromRoute] int id, [FromBody] SharePasswordDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+            {
+                return Unauthorized(new { message = "Korisnik nije autentifikovan" });
+            }
+
+            var (success, message) = await _passwordService.SharePasswordAsync(userId, id, dto);
+
+            if (!success)
+            {
+                return BadRequest(new { success, message });
+            }
+
+            return Ok(new { success, message });
+        }
+
+        /// <summary>
+        /// Preuzimanje liste korisnika sa kojima je lozinka podeljena
+        /// </summary>
+        [HttpGet("{id}/shares")]
+        public async Task<IActionResult> GetPasswordShares([FromRoute] int id)
+        {
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+            {
+                return Unauthorized(new { message = "Korisnik nije autentifikovan" });
+            }
+
+            var shares = await _passwordService.GetPasswordSharesAsync(id, userId);
+            return Ok(shares);
+        }
     }
 }

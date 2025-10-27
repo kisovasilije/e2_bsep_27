@@ -1,3 +1,4 @@
+using PKIBSEP.Dtos;
 using PKIBSEP.Dtos.PasswordManager;
 using PKIBSEP.Enums;
 using PKIBSEP.Interfaces;
@@ -205,6 +206,150 @@ namespace PKIBSEP.Services
             {
                 _logger.LogError(ex, "Greška pri brisanju lozinke {Id}", id);
                 return (false, "Greška pri brisanju lozinke");
+            }
+        }
+
+        public async Task<(bool success, string message)> SharePasswordAsync(int userId, int entryId, SharePasswordDto dto)
+        {
+            try
+            {
+                var entry = await _passwordRepository.GetByIdAsync(entryId);
+
+                if (entry == null)
+                {
+                    return (false, "Lozinka nije pronađena");
+                }
+
+                // Samo owner može deliti lozinku
+                if (entry.OwnerId != userId)
+                {
+                    return (false, "Samo vlasnik može deliti lozinku");
+                }
+
+                // Provera da target user postoji i ima javni ključ
+                var targetUser = await _userRepository.GetByIdAsync(dto.TargetUserId);
+                if (targetUser == null)
+                {
+                    return (false, "Korisnik nije pronađen");
+                }
+
+                if (targetUser.Role != UserRole.RegularUser)
+                {
+                    return (false, "Možete deliti samo sa običnim korisnicima");
+                }
+
+                if (string.IsNullOrEmpty(targetUser.PublicKeyPem))
+                {
+                    return (false, "Korisnik nema generisan javni ključ");
+                }
+
+                // Provera da već ne postoji share za tog korisnika
+                var existingShare = await _passwordRepository.GetPasswordShareAsync(entryId, dto.TargetUserId);
+                if (existingShare != null)
+                {
+                    return (false, "Lozinka je već podeljena sa ovim korisnikom");
+                }
+
+                // Ne može deliti sam sa sobom
+                if (dto.TargetUserId == userId)
+                {
+                    return (false, "Ne možete deliti lozinku sa samim sobom");
+                }
+
+                // Kreiranje novog share-a
+                var share = new PasswordShare
+                {
+                    PasswordEntryId = entryId,
+                    UserId = dto.TargetUserId,
+                    EncryptedPassword = dto.EncryptedPasswordForTarget,
+                    SharedAt = DateTime.UtcNow
+                };
+
+                await _passwordRepository.AddPasswordShareAsync(share);
+
+                _logger.LogInformation("Lozinka {EntryId} podeljena sa korisnikom {TargetUserId} od strane {OwnerId}",
+                    entryId, dto.TargetUserId, userId);
+
+                return (true, "Lozinka je uspešno podeljena");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Greška pri deljenju lozinke {EntryId}", entryId);
+                return (false, "Greška pri deljenju lozinke");
+            }
+        }
+
+        public async Task<List<SharedUserDto>> GetPasswordSharesAsync(int entryId, int userId)
+        {
+            try
+            {
+                var entry = await _passwordRepository.GetByIdAsync(entryId);
+
+                if (entry == null)
+                {
+                    return new List<SharedUserDto>();
+                }
+
+                // Samo owner može videti sa kim je podelio lozinku
+                if (entry.OwnerId != userId)
+                {
+                    return new List<SharedUserDto>();
+                }
+
+                var shares = await _passwordRepository.GetPasswordSharesAsync(entryId);
+
+                // Filtriraj owner-a iz liste (owner-a ne prikazujemo u listi share-ova)
+                return shares
+                    .Where(s => s.UserId != entry.OwnerId)
+                    .Select(s => new SharedUserDto
+                    {
+                        UserId = s.UserId,
+                        Email = s.User.Email,
+                        SharedAt = s.SharedAt
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Greška pri preuzimanju share-ova za lozinku {EntryId}", entryId);
+                return new List<SharedUserDto>();
+            }
+        }
+
+        public async Task<List<RegularUserDto>> GetAvailableUsersForSharingAsync(int userId, int entryId)
+        {
+            try
+            {
+                var entry = await _passwordRepository.GetByIdAsync(entryId);
+
+                if (entry == null || entry.OwnerId != userId)
+                {
+                    return new List<RegularUserDto>();
+                }
+
+                // Svi regular useri sa ključevima
+                var allUsers = await _userRepository.GetRegularUsersWithKeysAsync();
+
+                // Svi koji već imaju share
+                var existingShares = await _passwordRepository.GetPasswordSharesAsync(entryId);
+                var sharedUserIds = existingShares.Select(s => s.UserId).ToHashSet();
+
+                // Filter: ne prikazuj ownera i one sa kojima je već podeljeno
+                return allUsers
+                    .Where(u => u.Id != userId && !sharedUserIds.Contains(u.Id))
+                    .Select(u => new RegularUserDto
+                    {
+                        Id = u.Id,
+                        Email = u.Email,
+                        Username = u.Username,
+                        HasPublicKey = !string.IsNullOrEmpty(u.PublicKeyPem)
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Greška pri preuzimanju dostupnih korisnika za deljenje");
+                return new List<RegularUserDto>();
             }
         }
 

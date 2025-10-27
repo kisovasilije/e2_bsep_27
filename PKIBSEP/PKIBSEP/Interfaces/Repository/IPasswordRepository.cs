@@ -10,5 +10,7 @@ namespace PKIBSEP.Interfaces.Repository
         Task UpdateAsync(PasswordEntry entry);
         Task DeleteAsync(int id);
         Task<PasswordShare?> GetPasswordShareAsync(int entryId, int userId);
+        Task<PasswordShare> AddPasswordShareAsync(PasswordShare share);
+        Task<List<PasswordShare>> GetPasswordSharesAsync(int entryId);
     }
 }
