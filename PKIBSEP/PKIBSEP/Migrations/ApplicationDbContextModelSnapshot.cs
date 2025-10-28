@@ -22,6 +22,154 @@ namespace PKIBSEP.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("PKIBSEP.Models.Certificate.CaAssignment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AssignedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CaUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ChainRootCertificateId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Organization")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaUserId", "ChainRootCertificateId")
+                        .IsUnique();
+
+                    b.ToTable("CaAssignments");
+                });
+
+            modelBuilder.Entity("PKIBSEP.Models.Certificate.CaKeyMaterial", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CertificateId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EncryptedPfxPassword")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("KeystoreAlias")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PfxFilePath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CertificateId")
+                        .IsUnique();
+
+                    b.ToTable("CaKeyMaterials");
+                });
+
+            modelBuilder.Entity("PKIBSEP.Models.Certificate.Certificate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ChainPem")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ChainRootId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsCertificateAuthority")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("IssuerDistinguishedName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("NotAfterUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("NotBeforeUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Organization")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<int?>("OwnerUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ParentCertificateId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("PathLenConstraint")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PemCertificate")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("RevocationReason")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("RevokedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SerialHex")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("SubjectDistinguishedName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChainRootId");
+
+                    b.HasIndex("ParentCertificateId");
+
+                    b.HasIndex("SerialHex")
+                        .IsUnique();
+
+                    b.HasIndex("Type");
+
+                    b.ToTable("Certificates");
+                });
+
             modelBuilder.Entity("PKIBSEP.Models.PasswordEntry", b =>
                 {
                     b.Property<int>("Id")
@@ -207,6 +355,37 @@ namespace PKIBSEP.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Pki.Domain.CaUserKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CaUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("KeyVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ProtectedWrapKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaUserId", "KeyVersion")
+                        .IsUnique();
+
+                    b.ToTable("CaUserKeys");
                 });
 
             modelBuilder.Entity("PKIBSEP.Models.PasswordEntry", b =>

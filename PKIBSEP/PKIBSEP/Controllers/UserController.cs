@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PKIBSEP.Dtos;
 using PKIBSEP.Interfaces;
@@ -15,6 +16,40 @@ namespace PKIBSEP.Controllers
         {
             _userService = userService;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Returns CA users: Admin sees all, CA User sees only same organization
+        /// </summary>
+        [HttpGet("ca-users")]
+        [Authorize(Policy = "adminOrCaPolicy")]
+        public async Task<ActionResult<List<UserDto>>> GetCaUsers()
+        {
+            var currentUserId = GetCurrentUserId();
+            var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            var isAdmin = userRole == "Admin";
+
+            List<UserDto> caUsers;
+            if (isAdmin)
+            {
+                // Admin sees all CA users
+                caUsers = await _userService.GetCaUsersAsync();
+            }
+            else
+            {
+                // CA User sees only CA users from same organization
+                caUsers = await _userService.GetCaUsersByOrganizationAsync(currentUserId);
+            }
+
+            return Ok(caUsers);
+        }
+
+        private int GetCurrentUserId()
+        {
+            var sub = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(sub, out var id))
+                return id;
+            throw new UnauthorizedAccessException("Invalid user ID in token");
         }
 
         /// <summary>

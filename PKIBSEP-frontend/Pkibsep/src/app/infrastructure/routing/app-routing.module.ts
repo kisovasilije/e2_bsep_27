@@ -8,6 +8,9 @@ import { RegistrationComponent } from '../auth/registration/registration.compone
 import { ProfileComponent } from 'src/app/feature-modules/profile/profile/profile.component';
 import { EmailConfirmationComponent } from '../auth/email-confirmation/email-confirmation.component';
 import { PasswordResetComponent } from '../auth/password-reset/password-reset.component';
+import { CertificateListComponent } from 'src/app/feature-modules/certificates/certificate-list/certificate-list.component';
+import { CreateRootCertificateComponent } from 'src/app/feature-modules/certificates/create-root-certificate/create-root-certificate.component';
+import { IssueIntermediateCertificateComponent } from 'src/app/feature-modules/certificates/issue-intermediate-certificate/issue-intermediate-certificate.component';
 
 const routes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -20,6 +23,9 @@ const routes: Routes = [
     path: 'profile',
     component: ProfileComponent
   },
+  {path: 'certificates', component: CertificateListComponent, canActivate: [AuthGuard]},
+  {path: 'certificates/create-root', component: CreateRootCertificateComponent, canActivate: [AuthGuard]},
+  {path: 'certificates/issue-intermediate', component: IssueIntermediateCertificateComponent, canActivate: [AuthGuard]},
   {
     path: 'password-manager',
     loadChildren: () => import('../../feature-modules/password-manager/password-manager.module').then(m => m.PasswordManagerModule),

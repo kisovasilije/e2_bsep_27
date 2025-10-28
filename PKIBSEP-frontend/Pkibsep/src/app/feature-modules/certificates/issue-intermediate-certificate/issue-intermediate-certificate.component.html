@@ -1,0 +1,159 @@
+<div class="issue-intermediate-container">
+  <h2>Issue Intermediate Certificate</h2>
+
+  <form [formGroup]="intermediateForm" (ngSubmit)="onSubmit()">
+
+    <!-- Target CA User -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Target CA User</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>CA User (for whom to create certificate)</mat-label>
+          <mat-select formControlName="targetCaUserId" [required]="isAdmin()">
+            <mat-option *ngFor="let user of caUsers" [value]="user.id">
+              {{ user.email }}
+            </mat-option>
+          </mat-select>
+          <mat-hint *ngIf="!isAdmin()">Leave empty to issue to yourself</mat-hint>
+          <mat-error *ngIf="intermediateForm.get('targetCaUserId')?.hasError('required')">
+            Target CA User is required
+          </mat-error>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Issuer Selection -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Issuer CA Certificate</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Select Issuer CA</mat-label>
+          <mat-select formControlName="issuerId" required>
+            <mat-option *ngFor="let cert of caCertificates" [value]="cert.id">
+              {{ getCertificateDisplayName(cert) }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="intermediateForm.get('issuerId')?.hasError('required')">
+            Issuer CA is required
+          </mat-error>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Subject Information -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Subject Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Common Name (CN)</mat-label>
+          <input matInput formControlName="commonName" required>
+          <mat-error *ngIf="intermediateForm.get('commonName')?.hasError('required')">
+            Common Name is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Organization (O)</mat-label>
+          <input matInput formControlName="organization">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Organizational Unit (OU)</mat-label>
+          <input matInput formControlName="organizationalUnit">
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Country (C)</mat-label>
+            <input matInput formControlName="country" maxlength="2" placeholder="US">
+            <mat-error *ngIf="intermediateForm.get('country')?.hasError('minlength') || intermediateForm.get('country')?.hasError('maxlength')">
+              Country code must be exactly 2 characters
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>State/Province (ST)</mat-label>
+            <input matInput formControlName="state">
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Locality/City (L)</mat-label>
+          <input matInput formControlName="locality">
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Certificate Settings -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Certificate Settings</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Validity (Days)</mat-label>
+            <input matInput formControlName="validityDays" type="number" required>
+            <mat-error *ngIf="intermediateForm.get('validityDays')?.hasError('required')">
+              Validity days is required
+            </mat-error>
+            <mat-error *ngIf="intermediateForm.get('validityDays')?.hasError('min')">
+              Validity must be at least 1 day
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Path Length Constraint (Optional)</mat-label>
+            <input matInput formControlName="pathLenConstraint" type="number">
+            <mat-hint>Leave empty for unlimited</mat-hint>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Key Usage -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Key Usage</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="checkbox-grid">
+          <mat-checkbox formControlName="digitalSignature">Digital Signature</mat-checkbox>
+          <mat-checkbox formControlName="nonRepudiation">Non-Repudiation</mat-checkbox>
+          <mat-checkbox formControlName="keyEncipherment">Key Encipherment</mat-checkbox>
+          <mat-checkbox formControlName="dataEncipherment">Data Encipherment</mat-checkbox>
+          <mat-checkbox formControlName="keyAgreement">Key Agreement</mat-checkbox>
+          <mat-checkbox formControlName="keyCertSign">Certificate Signing</mat-checkbox>
+          <mat-checkbox formControlName="crlSign">CRL Signing</mat-checkbox>
+          <mat-checkbox formControlName="encipherOnly">Encipher Only</mat-checkbox>
+          <mat-checkbox formControlName="decipherOnly">Decipher Only</mat-checkbox>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="form-actions">
+      <button mat-raised-button type="button" (click)="onCancel()">
+        Cancel
+      </button>
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="intermediateForm.invalid || isSubmitting">
+        {{ isSubmitting ? 'Issuing...' : 'Issue Intermediate Certificate' }}
+      </button>
+    </div>
+  </form>
+</div>

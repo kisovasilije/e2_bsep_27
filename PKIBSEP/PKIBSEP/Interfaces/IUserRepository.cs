@@ -11,6 +11,7 @@ namespace PKIBSEP.Interfaces
         Task<User> CreateAsync(User user);
         Task UpdateAsync(User user);
         Task<bool> EmailExistsAsync(string email);
+        Task<List<User>> GetAllUsersAsync();
         Task<List<User>> GetRegularUsersWithKeysAsync();
     }
 }
