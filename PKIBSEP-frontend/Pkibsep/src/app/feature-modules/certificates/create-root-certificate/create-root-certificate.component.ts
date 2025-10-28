@@ -5,7 +5,6 @@ import { CertificateService } from '../certificate.service';
 import { CreateRootDto } from '../models/create-root-dto.model';
 import { KeyUsageDto } from '../models/key-usage.model';
 import { X500NameDto } from '../models/x500-name.model';
-import { UserDto } from '../models/user.model';
 import { AuthService } from 'src/app/infrastructure/auth/auth.service';
 import { User } from 'src/app/infrastructure/auth/model/user.model';
 
@@ -18,7 +17,6 @@ export class CreateRootCertificateComponent implements OnInit {
   rootForm: FormGroup;
   isSubmitting = false;
   errorMessage = '';
-  caUsers: UserDto[] = [];
   currentUser: User | undefined;
 
   constructor(
@@ -28,9 +26,6 @@ export class CreateRootCertificateComponent implements OnInit {
     private router: Router
   ) {
     this.rootForm = this.fb.group({
-      // Target CA User (for Admin only)
-      targetCaUserId: [null, Validators.required],
-
       // Subject fields
       commonName: ['', Validators.required],
       organization: [''],
@@ -60,27 +55,6 @@ export class CreateRootCertificateComponent implements OnInit {
     this.authService.user$.subscribe(user => {
       this.currentUser = user;
     });
-
-    // Admin mora da učita listu CA korisnika
-    if (this.isAdmin()) {
-      this.loadCaUsers();
-    }
-  }
-
-  loadCaUsers(): void {
-    this.certificateService.getCaUsers().subscribe({
-      next: (users) => {
-        this.caUsers = users;
-      },
-      error: (err) => {
-        console.error('Error loading CA users:', err);
-        this.errorMessage = 'Failed to load CA users';
-      }
-    });
-  }
-
-  isAdmin(): boolean {
-    return this.currentUser?.role === 'Admin';
   }
 
   onSubmit(): void {
@@ -115,7 +89,6 @@ export class CreateRootCertificateComponent implements OnInit {
     };
 
     const request: CreateRootDto = {
-      targetCaUserId: formValue.targetCaUserId,
       subject,
       validityDays: formValue.validityDays,
       pathLenConstraint: formValue.pathLenConstraint || undefined,

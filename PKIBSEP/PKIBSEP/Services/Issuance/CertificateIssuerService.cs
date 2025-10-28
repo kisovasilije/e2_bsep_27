@@ -24,23 +24,26 @@ namespace PKIBSEP.Services.Issuance
         private readonly IKeystoreService _keystoreService;
         private readonly ICertificateGenerator _certificateGenerator;
         private readonly ICaAssignmentRepository _caAssignmentRepository;
+        private readonly IUserRepository _userRepository;
 
         public CertificateIssuerService(
             ICertificateRepository certificateRepository,
             IIssuerValidationService issuerValidationService,
             IKeystoreService keystoreService,
             ICertificateGenerator certificateGenerator,
-            ICaAssignmentRepository caAssignmentRepository)
+            ICaAssignmentRepository caAssignmentRepository,
+            IUserRepository userRepository)
         {
             _certificateRepository = certificateRepository;
             _issuerValidationService = issuerValidationService;
             _keystoreService = keystoreService;
             _certificateGenerator = certificateGenerator;
             _caAssignmentRepository = caAssignmentRepository;
+            _userRepository = userRepository;
         }
 
         // ---- Root issuance ----
-        public async Task<Certificate> CreateRootAsync(X509Name subject, int validityDays, int? pathLen, int keyUsageFlags, int targetCaUserId, int assignedByUserId)
+        public async Task<Certificate> CreateRootAsync(X509Name subject, int validityDays, int? pathLen, int keyUsageFlags, int createdByAdminId)
         {
             var now = DateTime.UtcNow;
             var notBefore = now.AddMinutes(-5);
@@ -66,18 +69,9 @@ namespace PKIBSEP.Services.Issuance
             var newId = await _certificateRepository.InsertAsync(model);
             await _certificateRepository.SetChainRootAsync(newId, newId); // root's ChainRootId = self
 
-            // Save CA keystore (.pfx) with private key + (optionally) chain
+            // Save Root CA private key under Admin's wrap key (no CaAssignment created)
             var leafX509 = BcToX509WithPrivateKey(bcCert, keyPair);
-            await _keystoreService.SaveCaPfxAsync(targetCaUserId, newId, leafX509, new X509Certificate2Collection());
-
-            // Create CA assignment: link the target CA user to this root chain
-            await _caAssignmentRepository.InsertAsync(new CaAssignment
-            {
-                CaUserId = targetCaUserId,
-                ChainRootCertificateId = newId,
-                IsActive = true,
-                AssignedByUserId = assignedByUserId
-            });
+            await _keystoreService.SaveCaPfxAsync(createdByAdminId, newId, leafX509, new X509Certificate2Collection());
 
             return (await _certificateRepository.GetByIdAsync(newId))!;
         }
@@ -87,19 +81,32 @@ namespace PKIBSEP.Services.Issuance
             int issuerCertificateId, X509Name subject, int validityDays, int? pathLen, int keyUsageFlags, int targetCaUserId, int assignedByUserId, bool isAdmin)
         {
             // 1) Validate issuer (time window, CA flag, pathLen, chain signature, revocation)
-            await _issuerValidationService.ValidateAsync(issuerCertificateId, true, pathLen); // positional args
+            await _issuerValidationService.ValidateAsync(issuerCertificateId, true, pathLen);
 
             // 2) Get issuer certificate
             var issuer = await _certificateRepository.GetByIdAsync(issuerCertificateId)
                          ?? throw new Exception("ISSUER_NOT_FOUND");
 
-            // 3) If CA User (not Admin), validate they have access to this chain
+            // 3) If CA User (not Admin), validate access to issuer chain and organization
             if (!isAdmin)
             {
+                // CA User must have access to the issuer chain they selected
                 var issuerChainRootId = issuer.ChainRootId > 0 ? issuer.ChainRootId : issuer.Id;
-                var hasAccess = await _caAssignmentRepository.IsChainAssignedToUserAsync(targetCaUserId, issuerChainRootId);
+                var hasAccess = await _caAssignmentRepository.IsChainAssignedToUserAsync(assignedByUserId, issuerChainRootId);
                 if (!hasAccess)
                     throw new UnauthorizedAccessException("CA_USER_NO_ACCESS_TO_CHAIN");
+
+                // If issuing to another CA User (not self), validate same organization
+                if (targetCaUserId != assignedByUserId)
+                {
+                    var assignerUser = await _userRepository.GetByIdAsync(assignedByUserId)
+                                       ?? throw new Exception("ASSIGNER_USER_NOT_FOUND");
+                    var targetUser = await _userRepository.GetByIdAsync(targetCaUserId)
+                                     ?? throw new Exception("TARGET_USER_NOT_FOUND");
+
+                    if (assignerUser.Organization != targetUser.Organization)
+                        throw new UnauthorizedAccessException("CANNOT_ISSUE_ACROSS_ORGANIZATIONS");
+                }
             }
 
             // 4) Clamp validity to issuer.NotAfter

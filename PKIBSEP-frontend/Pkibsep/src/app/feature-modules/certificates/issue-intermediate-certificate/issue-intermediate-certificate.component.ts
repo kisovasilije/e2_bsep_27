@@ -66,19 +66,19 @@ export class IssueIntermediateCertificateComponent implements OnInit {
       this.currentUser = user;
     });
 
-    // Učitaj dostupne CA sertifikate
+    // Load available CA certificates
     this.loadMyCACertificates();
 
-    // Admin mora da učita listu CA korisnika
+    // Load CA users (Admin sees all, CA User sees same organization)
+    this.loadCaUsers();
+
+    // Admin MUST specify target user
     if (this.isAdmin()) {
-      this.loadCaUsers();
-      // Admin MORA da izabere target korisnika
       this.intermediateForm.get('targetCaUserId')?.setValidators([Validators.required]);
     }
   }
 
   loadMyCACertificates(): void {
-    // Ovaj endpoint vraća CA sertifikate filtrirane po korisniku
     this.certificateService.getMyCACertificates().subscribe({
       next: (certificates) => {
         this.caCertificates = certificates;
@@ -164,6 +164,6 @@ export class IssueIntermediateCertificateComponent implements OnInit {
   }
 
   getCertificateDisplayName(cert: CertificateDto): string {
-    return `${cert.subject.cn} (${cert.serialNumber})`;
+    return `${cert.subjectDN} (Serial: ${cert.serialHex})`;
   }
 }

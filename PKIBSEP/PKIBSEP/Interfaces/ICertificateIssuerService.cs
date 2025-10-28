@@ -13,8 +13,8 @@ namespace PKIBSEP.Interfaces
         /// <summary>
         /// Creates a self-signed Root CA certificate and persists:
         /// - certificate metadata (including PEM + chain),
-        /// - keystore (PFX with private key) protected via per-CA-user wrap key,
-        /// - CA assignment (linking the target CA user to this chain root).
+        /// - keystore (PFX with private key) protected via Admin's wrap key.
+        /// Root CA is NOT assigned to any CA user (no CaAssignment created).
         /// </summary>
         /// <param name="subject">Subject DN (X.500 name) for the Root CA.</param>
         /// <param name="validityDays">Validity period in days.</param>
@@ -23,10 +23,9 @@ namespace PKIBSEP.Interfaces
         /// null = unlimited, 0 = may only issue EE, N&gt;0 = allowed CA depth below.
         /// </param>
         /// <param name="keyUsageFlags">BouncyCastle KeyUsage flags (e.g., KeyCertSign | CrlSign).</param>
-        /// <param name="targetCaUserId">CA user id who will own this root's keystore.</param>
-        /// <param name="assignedByUserId">User ID who is creating this certificate (typically Admin).</param>
+        /// <param name="createdByAdminId">Admin user ID who creates this Root CA.</param>
         /// <returns>Persisted <see cref="Certificate"/> record.</returns>
-        Task<Certificate> CreateRootAsync(X509Name subject, int validityDays, int? pathLen, int keyUsageFlags, int targetCaUserId, int assignedByUserId);
+        Task<Certificate> CreateRootAsync(X509Name subject, int validityDays, int? pathLen, int keyUsageFlags, int createdByAdminId);
 
         /// <summary>
         /// Issues an Intermediate CA certificate under the given issuer CA and persists:

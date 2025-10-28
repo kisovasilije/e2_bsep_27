@@ -28,10 +28,6 @@ namespace PKIBSEP.Controllers
         {
             var currentUserId = GetCurrentCaUserId();
 
-            // Admin MUST specify targetCaUserId
-            if (request.TargetCaUserId == null)
-                return BadRequest("Admin must specify TargetCaUserId");
-
             var subject = Models.Mappers.X500NameMapper.ToX509Name(request.Subject);
             var keyUsageFlags = Crypto.X509.KeyUsageMapper.ToBouncyCastleFlags(request.KeyUsage);
 
@@ -40,8 +36,7 @@ namespace PKIBSEP.Controllers
                 request.ValidityDays,
                 request.PathLenConstraint,
                 keyUsageFlags,
-                targetCaUserId: request.TargetCaUserId.Value,
-                assignedByUserId: currentUserId);
+                createdByAdminId: currentUserId);
 
             return Ok(_mapper.Map<CertificateDto>(cert));
         }
@@ -65,10 +60,8 @@ namespace PKIBSEP.Controllers
             }
             else // CAUser
             {
-                // CA User can only issue for themselves
-                if (request.TargetCaUserId != null && request.TargetCaUserId != currentUserId)
-                    return Forbid();
-                targetCaUserId = currentUserId;
+                // CA User can issue to themselves OR another CA User (organization check in service layer)
+                targetCaUserId = request.TargetCaUserId ?? currentUserId;
             }
 
             var subject = Models.Mappers.X500NameMapper.ToX509Name(request.Subject);
@@ -95,8 +88,8 @@ namespace PKIBSEP.Controllers
         }
 
         /// <summary>
-        /// Vraća CA sertifikate dostupne trenutnom korisniku (za izbor issuera)
-        /// Admin vidi SVE CA sertifikate, CA korisnik vidi SAMO svoje dodeljene lance
+        /// Returns CA certificates available to current user (for issuer selection)
+        /// Admin sees ALL CA certificates, CA user sees ONLY their assigned chains
         /// </summary>
         [HttpGet("my-ca-certificates")]
         [Authorize(Policy = "adminOrCaPolicy")]

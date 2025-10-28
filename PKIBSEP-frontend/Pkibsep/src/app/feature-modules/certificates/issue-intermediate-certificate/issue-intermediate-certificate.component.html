@@ -3,19 +3,20 @@
 
   <form [formGroup]="intermediateForm" (ngSubmit)="onSubmit()">
 
-    <!-- Target CA User (Admin only) -->
-    <mat-card class="form-section" *ngIf="isAdmin()">
+    <!-- Target CA User -->
+    <mat-card class="form-section">
       <mat-card-header>
         <mat-card-title>Target CA User</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>CA User (for whom to create certificate)</mat-label>
-          <mat-select formControlName="targetCaUserId" required>
+          <mat-select formControlName="targetCaUserId" [required]="isAdmin()">
             <mat-option *ngFor="let user of caUsers" [value]="user.id">
               {{ user.email }}
             </mat-option>
           </mat-select>
+          <mat-hint *ngIf="!isAdmin()">Leave empty to issue to yourself</mat-hint>
           <mat-error *ngIf="intermediateForm.get('targetCaUserId')?.hasError('required')">
             Target CA User is required
           </mat-error>
@@ -82,20 +83,10 @@
           </mat-form-field>
         </div>
 
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Locality/City (L)</mat-label>
-            <input matInput formControlName="locality">
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Email Address</mat-label>
-            <input matInput formControlName="email" type="email">
-            <mat-error *ngIf="intermediateForm.get('email')?.hasError('email')">
-              Invalid email address
-            </mat-error>
-          </mat-form-field>
-        </div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Locality/City (L)</mat-label>
+          <input matInput formControlName="locality">
+        </mat-form-field>
       </mat-card-content>
     </mat-card>
 

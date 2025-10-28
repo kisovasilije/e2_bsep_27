@@ -17,5 +17,8 @@ namespace PKIBSEP.Interfaces.Repository
         Task<CaKeyMaterial?> GetCaKeyMaterialAsync(int certificateId);
 
         Task InsertCaKeyMaterialAsync(CaKeyMaterial material);
+
+        /// <summary>Returns all certificates from database.</summary>
+        Task<List<Certificate>> GetAllAsync();
     }
 }

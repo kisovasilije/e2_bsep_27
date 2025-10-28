@@ -272,5 +272,24 @@ namespace PKIBSEP.Services
                 })
                 .ToList();
         }
+
+        public async Task<List<UserDto>> GetCaUsersByOrganizationAsync(int userId)
+        {
+            var currentUser = await _userRepository.GetByIdAsync(userId)
+                              ?? throw new Exception("USER_NOT_FOUND");
+
+            var users = await _userRepository.GetAllUsersAsync();
+            return users
+                .Where(u => u.Role == UserRole.CAUser
+                         && u.Organization == currentUser.Organization
+                         && u.Id != userId) // Exclude current user
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    Role = u.Role.ToString()
+                })
+                .ToList();
+        }
     }
 }

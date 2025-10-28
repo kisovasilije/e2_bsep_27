@@ -49,7 +49,7 @@ export class CertificateListComponent implements OnInit {
   }
 
   getCertificateType(cert: CertificateDto): string {
-    return cert.isCA ? 'CA Certificate' : 'End-Entity';
+    return cert.isCa ? 'CA Certificate' : 'End-Entity';
   }
 
   navigateToCreateRoot(): void {

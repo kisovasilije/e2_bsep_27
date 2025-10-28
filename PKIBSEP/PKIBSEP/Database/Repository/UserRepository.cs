@@ -54,5 +54,10 @@ namespace PKIBSEP.Database.Repository
         {
             return await _context.Users.AnyAsync(u => u.Email == email);
         }
+
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            return await _context.Users.ToListAsync();
+        }
     }
 }

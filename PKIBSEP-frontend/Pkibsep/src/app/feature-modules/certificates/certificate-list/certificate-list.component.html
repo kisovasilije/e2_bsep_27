@@ -24,27 +24,27 @@
 
       <ng-container matColumnDef="serialNumber">
         <th mat-header-cell *matHeaderCellDef>Serial Number</th>
-        <td mat-cell *matCellDef="let cert">{{ cert.serialNumber }}</td>
+        <td mat-cell *matCellDef="let cert">{{ cert.serialHex }}</td>
       </ng-container>
 
       <ng-container matColumnDef="commonName">
-        <th mat-header-cell *matHeaderCellDef>Common Name</th>
-        <td mat-cell *matCellDef="let cert">{{ cert.subject.cn }}</td>
+        <th mat-header-cell *matHeaderCellDef>Subject DN</th>
+        <td mat-cell *matCellDef="let cert">{{ cert.subjectDN }}</td>
       </ng-container>
 
       <ng-container matColumnDef="organization">
-        <th mat-header-cell *matHeaderCellDef>Organization</th>
-        <td mat-cell *matCellDef="let cert">{{ cert.subject.o || 'N/A' }}</td>
+        <th mat-header-cell *matHeaderCellDef>Issuer DN</th>
+        <td mat-cell *matCellDef="let cert">{{ cert.issuerDN }}</td>
       </ng-container>
 
       <ng-container matColumnDef="validFrom">
         <th mat-header-cell *matHeaderCellDef>Valid From</th>
-        <td mat-cell *matCellDef="let cert">{{ cert.validFrom | date: 'short' }}</td>
+        <td mat-cell *matCellDef="let cert">{{ cert.notBeforeUtc | date: 'short' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="validTo">
         <th mat-header-cell *matHeaderCellDef>Valid To</th>
-        <td mat-cell *matCellDef="let cert">{{ cert.validTo | date: 'short' }}</td>
+        <td mat-cell *matCellDef="let cert">{{ cert.notAfterUtc | date: 'short' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="type">

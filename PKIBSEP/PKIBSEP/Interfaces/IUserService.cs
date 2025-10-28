@@ -10,5 +10,6 @@ namespace PKIBSEP.Interfaces
         Task<(bool success, string message)> ResetPasswordAsync(string token, string newPassword);
         PasswordStrengthDto CheckPasswordStrength(string password);
         Task<List<UserDto>> GetCaUsersAsync();
+        Task<List<UserDto>> GetCaUsersByOrganizationAsync(int userId);
     }
 }

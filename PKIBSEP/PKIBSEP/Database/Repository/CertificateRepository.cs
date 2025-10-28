@@ -68,5 +68,10 @@ namespace PKIBSEP.Database.Repository
             _db.CaKeyMaterials.Add(material);
             await _db.SaveChangesAsync();
         }
+
+        public async Task<List<Certificate>> GetAllAsync()
+        {
+            return await _db.Certificates.AsNoTracking().ToListAsync();
+        }
     }
 }
