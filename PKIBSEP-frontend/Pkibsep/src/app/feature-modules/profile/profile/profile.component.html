@@ -26,4 +26,4 @@
   <button mat-raised-button color="accent" (click)="requestPasswordRecovery()">Request Password Recovery</button>
 </div>
 
-<xp-key-setup></xp-key-setup>
+<xp-key-setup *ngIf="user && user.role === 'RegularUser'"></xp-key-setup>

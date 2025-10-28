@@ -26,13 +26,11 @@ namespace PKIBSEP.Services
                     return (false, "Korisnik nije pronađen");
                 }
 
-                // Samo EE korisnici (RegularUser) mogu da imaju ključeve za password manager
                 if (user.Role != UserRole.RegularUser)
                 {
                     return (false, "Samo obični korisnici mogu koristiti password manager");
                 }
 
-                // Validacija da je PEM format (osnovna validacija)
                 if (!IsValidPemFormat(publicKeyPem))
                 {
                     return (false, "Neispravan format javnog ključa");
@@ -83,7 +81,6 @@ namespace PKIBSEP.Services
         {
             try
             {
-                // Provera da requesting user postoji i da je RegularUser
                 var requestingUser = await _userRepository.GetByIdAsync(requestingUserId);
                 if (requestingUser == null || requestingUser.Role != UserRole.RegularUser)
                 {
@@ -125,7 +122,6 @@ namespace PKIBSEP.Services
                 return false;
             }
 
-            // Osnovna validacija PEM formata
             return pem.Contains("-----BEGIN PUBLIC KEY-----") &&
                    pem.Contains("-----END PUBLIC KEY-----");
         }

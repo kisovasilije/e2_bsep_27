@@ -46,8 +46,7 @@ export class KeySetupComponent implements OnInit {
         title: 'Generisanje ključeva za Password Manager',
         message:
           'Klikom na "Potvrdi" generisaćete par ključeva. Privatni ključ ćete preuzeti kao fajl. ' +
-          'VAŽNO: Čuvajte privatni ključ na sigurnom mestu! Bez njega nećete moći pristupiti svojim lozinkama. ' +
-          'Sistem NIKADA ne čuva privatni ključ.',
+          'Čuvajte privatni ključ na sigurnom mestu!',
       },
     });
 

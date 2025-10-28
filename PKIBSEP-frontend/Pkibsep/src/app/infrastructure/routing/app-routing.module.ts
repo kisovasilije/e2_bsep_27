@@ -4,6 +4,7 @@ import { HomeComponent } from 'src/app/feature-modules/layout/home/home.componen
 import { LoginComponent } from '../auth/login/login.component';
 import { EquipmentComponent } from 'src/app/feature-modules/administration/equipment/equipment.component';
 import { AuthGuard } from '../auth/auth.guard';
+import { RoleGuard } from '../auth/role.guard';
 import { RegistrationComponent } from '../auth/registration/registration.component';
 import { ProfileComponent } from 'src/app/feature-modules/profile/profile/profile.component';
 import { EmailConfirmationComponent } from '../auth/email-confirmation/email-confirmation.component';
@@ -29,7 +30,8 @@ const routes: Routes = [
   {
     path: 'password-manager',
     loadChildren: () => import('../../feature-modules/password-manager/password-manager.module').then(m => m.PasswordManagerModule),
-    canActivate: [AuthGuard]
+    canActivate: [RoleGuard],
+    data: { roles: ['RegularUser'] }
   }
 ];
 

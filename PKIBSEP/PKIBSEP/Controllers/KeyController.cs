@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PKIBSEP.Dtos.Keys;
 using PKIBSEP.Interfaces;
@@ -7,6 +8,7 @@ namespace PKIBSEP.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "RegularUser")]
     public class KeyController : ControllerBase
     {
         private readonly IKeyService _keyService;
@@ -29,7 +31,6 @@ namespace PKIBSEP.Controllers
                 return BadRequest(ModelState);
             }
 
-            // Uzimanje userId iz JWT tokena
             if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
             {
                 return Unauthorized(new { message = "Korisnik nije autentifikovan" });

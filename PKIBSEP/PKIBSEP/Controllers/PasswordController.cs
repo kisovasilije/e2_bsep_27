@@ -8,7 +8,7 @@ namespace PKIBSEP.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles = "RegularUser")]
     public class PasswordController : ControllerBase
     {
         private readonly IPasswordService _passwordService;
