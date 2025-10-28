@@ -103,12 +103,13 @@ namespace PKIBSEP.Controllers
 
             if (isAdmin)
             {
-                // Admin vidi SVE CA sertifikate
+                // Admin vidi SVE CA sertifikate (root + intermediate)
                 certificates = await _issuerService.GetAllCACertificatesAsync();
             }
             else
             {
-                // CA korisnik vidi SAMO sertifikate iz svojih dodeljenih lanaca
+                // CA korisnik vidi SAMO intermediate CA sertifikate iz svojih dodeljenih lanaca
+                // Root CA sertifikati su eksplicitno isključeni iz bezbednosnih razloga
                 certificates = await _issuerService.GetUserCACertificatesAsync(currentUserId);
             }
 

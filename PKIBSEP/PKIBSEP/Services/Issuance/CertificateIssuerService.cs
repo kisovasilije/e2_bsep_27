@@ -90,6 +90,11 @@ namespace PKIBSEP.Services.Issuance
             // 3) If CA User (not Admin), validate access to issuer chain and organization
             if (!isAdmin)
             {
+                // SIGURNOST: CA korisnik NE SME da koristi root CA sertifikat kao issuer
+                // Root CA privatni ključevi su dostupni samo administratoru
+                if (issuer.Type == CertificateType.RootCa)
+                    throw new UnauthorizedAccessException("CA_USER_CANNOT_USE_ROOT_CA_AS_ISSUER");
+
                 // CA User must have access to the issuer chain they selected
                 var issuerChainRootId = issuer.ChainRootId > 0 ? issuer.ChainRootId : issuer.Id;
                 var hasAccess = await _caAssignmentRepository.IsChainAssignedToUserAsync(assignedByUserId, issuerChainRootId);
@@ -116,9 +121,15 @@ namespace PKIBSEP.Services.Issuance
             var requestedNotAfter = now.AddDays(validityDays);
             var notAfter = requestedNotAfter <= issuer.NotAfterUtc ? requestedNotAfter : issuer.NotAfterUtc;
 
-            // 3) Load issuer .pfx and extract private key for signing
+            // 5) Load issuer .pfx and extract private key for signing
             var caKeyMaterial = await _certificateRepository.GetCaKeyMaterialAsync(issuer.Id)
                                 ?? throw new Exception("ISSUER_KEYSTORE_NOT_FOUND");
+
+            // KRITIČNA SIGURNOSNA PROVERA:
+            // CA korisnik može koristiti SAMO sertifikate čiji je on vlasnik privatnog ključa
+            // Ovo sprečava CA korisnike da koriste sertifikate drugih CA korisnika iz istog lanca
+            if (!isAdmin && caKeyMaterial.OwnerId != assignedByUserId)
+                throw new UnauthorizedAccessException("CA_USER_NOT_OWNER_OF_ISSUER_PRIVATE_KEY");
 
             // Use the issuer keystore owner's wrap key to decrypt the PFX password
             var (issuerX509, _) = await _keystoreService.LoadIssuerAsync(caKeyMaterial.OwnerId, caKeyMaterial);
@@ -202,10 +213,26 @@ namespace PKIBSEP.Services.Issuance
                 return new List<Certificate>();
 
             // Dohvati sve CA sertifikate koji pripadaju tim lancima
+            // SIGURNOST: CA korisnik može da vidi SAMO intermediate CA sertifikate čiji je on vlasnik privatnog ključa
+            // Ovo sprečava:
+            // 1. Pristup root CA sertifikatima (Type != RootCa)
+            // 2. Pristup sertifikatima drugih CA korisnika iz istog lanca (filtrira se kroz CaKeyMaterial.OwnerId)
             var allCerts = await _certificateRepository.GetAllAsync();
-            return allCerts
-                .Where(c => c.IsCertificateAuthority && assignedChainRoots.Contains(c.ChainRootId))
-                .ToList();
+
+            // Za svaki kandidat sertifikat, proveri da li korisnik poseduje privatni ključ
+            var result = new List<Certificate>();
+            foreach (var cert in allCerts.Where(c => c.IsCertificateAuthority
+                                                  && assignedChainRoots.Contains(c.ChainRootId)
+                                                  && c.Type != CertificateType.RootCa))
+            {
+                var keyMaterial = await _certificateRepository.GetCaKeyMaterialAsync(cert.Id);
+                if (keyMaterial != null && keyMaterial.OwnerId == caUserId)
+                {
+                    result.Add(cert);
+                }
+            }
+
+            return result;
         }
 
         // ---- helpers ----
