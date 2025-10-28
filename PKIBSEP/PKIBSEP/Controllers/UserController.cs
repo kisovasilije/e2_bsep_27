@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PKIBSEP.Dtos;
 using PKIBSEP.Interfaces;
@@ -15,6 +16,17 @@ namespace PKIBSEP.Controllers
         {
             _userService = userService;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Vraća listu CA korisnika (samo za Admin)
+        /// </summary>
+        [HttpGet("ca-users")]
+        [Authorize(Policy = "adminPolicy")]
+        public async Task<ActionResult<List<UserDto>>> GetCaUsers()
+        {
+            var caUsers = await _userService.GetCaUsersAsync();
+            return Ok(caUsers);
         }
 
         /// <summary>

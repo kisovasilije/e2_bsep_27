@@ -258,5 +258,19 @@ namespace PKIBSEP.Services
                 .Replace("/", "_")
                 .Replace("=", "");
         }
+
+        public async Task<List<UserDto>> GetCaUsersAsync()
+        {
+            var users = await _userRepository.GetAllUsersAsync();
+            return users
+                .Where(u => u.Role == UserRole.CAUser)
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    Role = u.Role.ToString()
+                })
+                .ToList();
+        }
     }
 }

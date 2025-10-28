@@ -1,0 +1,31 @@
+.certificate-list-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.actions-bar {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.certificate-table {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.no-certificates {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+th.mat-header-cell {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+td.mat-cell {
+  font-size: 13px;
+}

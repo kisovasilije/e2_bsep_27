@@ -1,10 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PKIBSEP.Crypto.X509;
 using PKIBSEP.Database;
 using PKIBSEP.Database.Repository;
 using PKIBSEP.Interfaces;
 using PKIBSEP.Interfaces.Repository;
 using PKIBSEP.Models.Mappers;
 using PKIBSEP.Services;
+using PKIBSEP.Services.Crypto;
+using PKIBSEP.Services.Issuance;
+using PKIBSEP.Services.Keystore;
+using PKIBSEP.Services.Security;
 
 namespace PKIBSEP.Startup
 {
@@ -27,6 +32,12 @@ namespace PKIBSEP.Startup
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ISessionService, SessionService>();
+            services.AddScoped<IChainService, BouncyCastleChainService>();
+            services.AddScoped<IIssuerValidationService, IssuerValidationService>();
+            services.AddScoped<IKeystoreService,KeystoreService>();
+            services.AddScoped<ICaUserKeyService, CaUserKeyService>();
+            services.AddScoped<ICertificateIssuerService, CertificateIssuerService>();
+            services.AddScoped<ICertificateGenerator, CertificateGenerator>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services, IConfiguration configuration)
@@ -34,6 +45,10 @@ namespace PKIBSEP.Startup
             // Register repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ISessionRepository, SessionRepository>();
+
+            services.AddScoped<ICertificateRepository, CertificateRepository>();
+            services.AddScoped<ICaUserKeyRepository, CaUserKeyRepository>();
+            services.AddScoped<ICaAssignmentRepository, CaAssignmentRepository>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));

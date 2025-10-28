@@ -11,6 +11,9 @@ builder.Services.AddAuthorization();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.ConfigureBSEP(builder.Configuration);
+builder.Services.AddDataProtection(); // protects CaUserKey.ProtectedWrapKey
+var keystoreFolder = builder.Configuration["Keystore:Folder"];
+Directory.CreateDirectory(keystoreFolder!);
 builder.Services.ConfigureCors(builder.Configuration);
 builder.Services.AddJwtAuth(builder.Configuration);
 
