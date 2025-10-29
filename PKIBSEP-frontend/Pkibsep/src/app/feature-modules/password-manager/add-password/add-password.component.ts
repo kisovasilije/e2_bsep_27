@@ -54,7 +54,7 @@ export class AddPasswordComponent implements OnInit {
     });
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.passwordForm.invalid || !this.publicKeyPem) {
       return;
     }
@@ -64,8 +64,7 @@ export class AddPasswordComponent implements OnInit {
     try {
       const formValue = this.passwordForm.value;
 
-      // Enkriptovanje lozinke javnim ključem
-      const encryptedPassword = this.cryptoService.encryptPassword(
+      const encryptedPassword = await this.cryptoService.encryptPassword(
         formValue.password,
         this.publicKeyPem
       );
