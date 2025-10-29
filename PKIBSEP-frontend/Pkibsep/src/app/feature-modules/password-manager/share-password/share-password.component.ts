@@ -96,7 +96,6 @@ export class SharePasswordComponent implements OnInit {
       return;
     }
 
-    // Preuzmi javni ključ target korisnika
     this.isSubmitting = true;
     this.keyService.getUserPublicKey(targetUserId).subscribe({
       next: (response) => {
@@ -106,20 +105,16 @@ export class SharePasswordComponent implements OnInit {
           return;
         }
 
-        try {
-          // Re-enkriptuj lozinku za target korisnika
-          const encryptedPasswordForTarget = this.cryptoService.reEncryptForSharing(
-            this.passwordEntry.encryptedPassword,
-            this.privateKeyPem!,
-            response.publicKeyPem
-          );
-
+        this.cryptoService.reEncryptForSharing(
+          this.passwordEntry.encryptedPassword,
+          this.privateKeyPem!,
+          response.publicKeyPem
+        ).then((encryptedPasswordForTarget) => {
           const shareData: SharePassword = {
             targetUserId: targetUserId,
             encryptedPasswordForTarget: encryptedPasswordForTarget,
           };
 
-          // Pozovi API za deljenje
           this.passwordService.sharePassword(this.passwordEntry.id, shareData).subscribe({
             next: (result) => {
               this.snackBar.open(result.message, 'Zatvori', { duration: 3000 });
@@ -133,7 +128,7 @@ export class SharePasswordComponent implements OnInit {
               this.isSubmitting = false;
             },
           });
-        } catch (error: any) {
+        }).catch((error: any) => {
           console.error('Greška pri re-enkripciji:', error);
           this.snackBar.open(
             error.message || 'Greška pri re-enkripciji. Proverite da li ste koristili ispravan privatni ključ.',
@@ -141,7 +136,7 @@ export class SharePasswordComponent implements OnInit {
             { duration: 5000 }
           );
           this.isSubmitting = false;
-        }
+        });
       },
       error: (err) => {
         console.error('Greška pri preuzimanju javnog ključa:', err);

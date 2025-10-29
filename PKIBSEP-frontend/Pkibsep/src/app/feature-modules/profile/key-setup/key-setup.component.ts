@@ -5,6 +5,8 @@ import { CryptoService } from 'src/app/infrastructure/password-manager/crypto.se
 import { KeyService } from 'src/app/infrastructure/password-manager/key.service';
 import { KeyPair } from 'src/app/infrastructure/password-manager/model/key-pair.model';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
+import { AuthService } from 'src/app/infrastructure/auth/auth.service';
+import { User } from 'src/app/infrastructure/auth/model/user.model';
 
 @Component({
   selector: 'xp-key-setup',
@@ -15,16 +17,25 @@ export class KeySetupComponent implements OnInit {
   hasKey: boolean = false;
   keyGeneratedAt: Date | null = null;
   isLoading: boolean = false;
+  currentUser: User | undefined;
 
   constructor(
     private cryptoService: CryptoService,
     private keyService: KeyService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.loadCurrentUser();
     this.checkExistingKey();
+  }
+
+  private loadCurrentUser(): void {
+    this.authService.user$.subscribe((user) => {
+      this.currentUser = user;
+    });
   }
 
   private checkExistingKey(): void {
@@ -57,45 +68,50 @@ export class KeySetupComponent implements OnInit {
     });
   }
 
-  private performKeyGeneration(): void {
+  private async performKeyGeneration(): Promise<void> {
     this.isLoading = true;
 
     try {
-      // Generisanje ključeva (može trajati nekoliko sekundi)
-      setTimeout(() => {
-        const keyPair: KeyPair = this.cryptoService.generateKeyPair();
+      const keyPair: KeyPair = await this.cryptoService.generateKeyPair();
 
-        // Download privatnog ključa
-        this.cryptoService.downloadPrivateKey(
-          keyPair.privateKeyPem,
-          `password_manager_private_key_${Date.now()}.pem`
-        );
+      const filename = this.generatePrivateKeyFilename();
 
-        // Slanje javnog ključa na backend
-        this.keyService.savePublicKey(keyPair.publicKeyPem).subscribe({
-          next: (response) => {
-            this.isLoading = false;
-            this.hasKey = true;
-            this.keyGeneratedAt = new Date();
-            this.snackBar.open(
-              'Ključevi su uspešno generisani! Privatni ključ je preuzet. Čuvajte ga na sigurnom mestu!',
-              'Zatvori',
-              { duration: 5000 }
-            );
-          },
-          error: (err) => {
-            this.isLoading = false;
-            this.snackBar.open(
-              err.error?.message || 'Greška pri čuvanju javnog ključa',
-              'Zatvori',
-              { duration: 3000 }
-            );
-          },
-        });
-      }, 100);
+      this.cryptoService.downloadPrivateKey(keyPair.privateKeyPem, filename);
+
+      this.keyService.savePublicKey(keyPair.publicKeyPem).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.hasKey = true;
+          this.keyGeneratedAt = new Date();
+          this.snackBar.open(
+            'Ključevi su uspešno generisani! Privatni ključ je preuzet. Čuvajte ga na sigurnom mestu!',
+            'Zatvori',
+            { duration: 5000 }
+          );
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.snackBar.open(
+            err.error?.message || 'Greška pri čuvanju javnog ključa',
+            'Zatvori',
+            { duration: 3000 }
+          );
+        },
+      });
     } catch (error) {
       this.isLoading = false;
       this.snackBar.open('Greška pri generisanju ključeva', 'Zatvori', { duration: 3000 });
     }
+  }
+
+  private generatePrivateKeyFilename(): string {
+    const username = this.currentUser?.email?.split('@')[0] || 'user';
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+
+    return `${username}_${dateStr}.pem`;
   }
 }

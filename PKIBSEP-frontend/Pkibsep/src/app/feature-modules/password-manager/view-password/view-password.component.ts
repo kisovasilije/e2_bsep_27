@@ -37,7 +37,6 @@ export class ViewPasswordComponent implements OnInit {
       this.isDecrypting = true;
       this.privateKeyPem = await this.cryptoService.readPrivateKeyFromFile(file);
 
-      // Odmah dekriptuj lozinku
       this.decryptPassword();
     } catch (error: any) {
       console.error('Greška pri učitavanju privatnog ključa:', error);
@@ -48,13 +47,13 @@ export class ViewPasswordComponent implements OnInit {
     }
   }
 
-  private decryptPassword(): void {
+  private async decryptPassword(): Promise<void> {
     if (!this.privateKeyPem) {
       return;
     }
 
     try {
-      this.decryptedPassword = this.cryptoService.decryptPassword(
+      this.decryptedPassword = await this.cryptoService.decryptPassword(
         this.passwordEntry.encryptedPassword,
         this.privateKeyPem
       );
