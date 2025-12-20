@@ -7,6 +7,7 @@ import { CreateRootDto } from './models/create-root-dto.model';
 import { IssueIntermediateDto } from './models/issue-intermediate-dto.model';
 import { UserDto } from './models/user.model';
 import { Csr } from './models/csr.model';
+import { CsrResponse } from './models/csr-response.model';
 
 @Injectable({
   providedIn: 'root',
@@ -38,7 +39,7 @@ export class CertificateService {
     return this.http.get(environment.apiHost + `certificates/${id}/download`, { responseType: 'blob' });
   }
 
-  createCsr(csr: Csr): Observable<void> {
-    return this.http.post<void>(environment.apiHost + 'certificates/csr', csr);
+  createCsr(csr: Csr): Observable<CsrResponse> {
+    return this.http.post<CsrResponse>(environment.apiHost + 'certificates/csr', csr);
   }
 }

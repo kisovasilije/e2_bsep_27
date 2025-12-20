@@ -5,7 +5,7 @@
 </div>
 <div mat-dialog-actions align="end" class="actions">
   <button mat-button color="primary" mat-dialog-close>Cancel</button>
-  <button mat-raised-button color="accent" [disabled]="!csr?.csrPem" (click)="onCreateCsr()">
+  <button mat-raised-button color="accent" [disabled]="isCreateCsrButtonDisabled" (click)="onCreateCsr()">
     <mat-icon>add</mat-icon>
     Create
   </button>

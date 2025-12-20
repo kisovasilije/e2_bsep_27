@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PKIBSEP.Common;
 using PKIBSEP.Crypto.X509;
 using PKIBSEP.Database;
 using PKIBSEP.Database.Repository;
@@ -22,6 +23,8 @@ namespace PKIBSEP.Startup
 
             services.AddAutoMapper(typeof(PkibsepProfile));
 
+            services.Configure<CaOptions>(configuration.GetSection("Ca"));
+
             return services;
         }
 
@@ -40,6 +43,7 @@ namespace PKIBSEP.Startup
             services.AddScoped<ICertificateGenerator, CertificateGenerator>();
             services.AddScoped<IKeyService, KeyService>();
             services.AddScoped<IPasswordService, PasswordService>();
+            services.AddScoped<ICaService, CaService>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services, IConfiguration configuration)

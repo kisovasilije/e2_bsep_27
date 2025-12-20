@@ -17,11 +17,14 @@ namespace PKIBSEP.Controllers
         private readonly IMapper _mapper;
         private readonly ILogger<CertificatesController> _logger;
 
-        public CertificatesController(ICertificateIssuerService issuerService, IMapper mapper, ILogger<CertificatesController> logger)
+        private readonly ICaService caService;
+
+        public CertificatesController(ICertificateIssuerService issuerService, IMapper mapper, ILogger<CertificatesController> logger, ICaService caService)
         {
             _issuerService = issuerService;
             _mapper = mapper;
             _logger = logger;
+            this.caService = caService;
         }
 
         [HttpPost("create-root")]
@@ -136,11 +139,21 @@ namespace PKIBSEP.Controllers
         }
 
         [HttpPost("csr")]
-        public async Task<IActionResult> SignCertificateAsync(CertificateSigningRequestDto csr)
+        public ActionResult<CsrResponseDto> SignCertificate(CertificateSigningRequestDto csr)
         {
-            _logger.LogInformation("Received CSR: {CsrPem}", csr.CsrPem);
-            await Task.Delay(0);
-            return Ok();
+            try
+            {
+                var (clientCertPem, caCertPem, serialNumberHex) = caService.SignCsr(csr.CsrPem);
+
+                return Ok(new CsrResponseDto(
+                    clientCertPem: clientCertPem,
+                    caCertPem: caCertPem,
+                    serialNumberHex: serialNumberHex));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }

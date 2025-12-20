@@ -12,6 +12,8 @@ import { MatDialogRef } from '@angular/material/dialog';
 export class CsrDialogComponent {
   protected csr: Csr | undefined = undefined;
 
+  protected isCreateCsrButtonDisabled = true;
+
   private readonly certificateService = inject(CertificateService);
 
   private readonly snackBar = inject(MatSnackBar);
@@ -28,11 +30,12 @@ export class CsrDialogComponent {
     const reader = new FileReader();
 
     reader.onload = () => {
-      console.log('Uploaded csr content read');
       const text = reader.result as string;
       this.csr = {
         csrPem: text,
       };
+
+      this.isCreateCsrButtonDisabled = false;
     };
 
     reader.readAsText(file);
@@ -44,7 +47,7 @@ export class CsrDialogComponent {
       return;
     }
 
-    this.certificateService.createCsr(this.csr).subscribe(() => {
+    this.certificateService.createCsr(this.csr).subscribe((csrResponse) => {
       this.snackBar.open('CSR created successfully.', 'Close', { duration: 3000 });
 
       this.dialogRef.close();
