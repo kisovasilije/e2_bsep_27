@@ -2,10 +2,16 @@
   <div>
     <p>PKIBSEP</p>
     <div id="buttons">
+      <button *ngIf="user?.email !== ''" mat-raised-button color="primary" title="Generate CSR" (click)="onGenerateCsr()">
+        <mat-icon>key</mat-icon>
+        CSR
+      </button>
       <button *ngIf="user && user.email === ''" color="accent" mat-raised-button [routerLink]="['login']">Login</button>
       <button *ngIf="user && user.email === ''" color="accent" mat-raised-button [routerLink]="['register']">Register</button>
       <button *ngIf="user?.email !== ''" color="primary" mat-raised-button [routerLink]="['profile']">Profile</button>
-      <button *ngIf="user && user.role === 'RegularUser'" color="primary" mat-raised-button [routerLink]="['password-manager']">Password Manager</button>
+      <button *ngIf="user && user.role === 'RegularUser'" color="primary" mat-raised-button [routerLink]="['password-manager']">
+        Password Manager
+      </button>
       <button *ngIf="user && user.email !== ''" color="accent" mat-raised-button (click)="onLogout()">Logout</button>
       <button color="primary" mat-raised-button [routerLink]="['home']">Home</button>
       <button *ngIf="user && (user.role === 'Admin' || user.role === 'CAUser')" color="primary" mat-raised-button [routerLink]="['certificates']">

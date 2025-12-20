@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PKIBSEP.Dtos;
+using PKIBSEP.Dtos.Certificates;
 using PKIBSEP.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -14,11 +15,16 @@ namespace PKIBSEP.Controllers
     {
         private readonly ICertificateIssuerService _issuerService;
         private readonly IMapper _mapper;
+        private readonly ILogger<CertificatesController> _logger;
 
-        public CertificatesController(ICertificateIssuerService issuerService, IMapper mapper)
+        private readonly ICaService caService;
+
+        public CertificatesController(ICertificateIssuerService issuerService, IMapper mapper, ILogger<CertificatesController> logger, ICaService caService)
         {
             _issuerService = issuerService;
             _mapper = mapper;
+            _logger = logger;
+            this.caService = caService;
         }
 
         [HttpPost("create-root")]
@@ -130,6 +136,24 @@ namespace PKIBSEP.Controllers
                 return id;
 
             throw new UnauthorizedAccessException("JWT 'sub' must contain an integer user id.");
+        }
+
+        [HttpPost("csr")]
+        public ActionResult<CsrResponseDto> SignCertificate(CertificateSigningRequestDto csr)
+        {
+            try
+            {
+                var (clientCertPem, caCertPem, serialNumberHex) = caService.SignCsr(csr.CsrPem);
+
+                return Ok(new CsrResponseDto(
+                    clientCertPem: clientCertPem,
+                    caCertPem: caCertPem,
+                    serialNumberHex: serialNumberHex));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }

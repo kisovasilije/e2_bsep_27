@@ -6,50 +6,40 @@ import { CertificateDto } from './models/certificate.model';
 import { CreateRootDto } from './models/create-root-dto.model';
 import { IssueIntermediateDto } from './models/issue-intermediate-dto.model';
 import { UserDto } from './models/user.model';
+import { Csr } from './models/csr.model';
+import { CsrResponse } from './models/csr-response.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CertificateService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   createRootCertificate(request: CreateRootDto): Observable<CertificateDto> {
-    return this.http.post<CertificateDto>(
-      environment.apiHost + 'certificates/create-root',
-      request
-    );
+    return this.http.post<CertificateDto>(environment.apiHost + 'certificates/create-root', request);
   }
 
   issueIntermediateCertificate(request: IssueIntermediateDto): Observable<CertificateDto> {
-    return this.http.post<CertificateDto>(
-      environment.apiHost + 'certificates/issue-intermediate',
-      request
-    );
+    return this.http.post<CertificateDto>(environment.apiHost + 'certificates/issue-intermediate', request);
   }
 
   getCertificates(): Observable<CertificateDto[]> {
-    return this.http.get<CertificateDto[]>(
-      environment.apiHost + 'certificates'
-    );
+    return this.http.get<CertificateDto[]>(environment.apiHost + 'certificates');
   }
 
   getMyCACertificates(): Observable<CertificateDto[]> {
-    return this.http.get<CertificateDto[]>(
-      environment.apiHost + 'certificates/my-ca-certificates'
-    );
+    return this.http.get<CertificateDto[]>(environment.apiHost + 'certificates/my-ca-certificates');
   }
 
   getCaUsers(): Observable<UserDto[]> {
-    return this.http.get<UserDto[]>(
-      environment.apiHost + 'user/ca-users'
-    );
+    return this.http.get<UserDto[]>(environment.apiHost + 'user/ca-users');
   }
 
   downloadCertificate(id: number): Observable<Blob> {
-    return this.http.get(
-      environment.apiHost + `certificates/${id}/download`,
-      { responseType: 'blob' }
-    );
+    return this.http.get(environment.apiHost + `certificates/${id}/download`, { responseType: 'blob' });
+  }
+
+  createCsr(csr: Csr): Observable<CsrResponse> {
+    return this.http.post<CsrResponse>(environment.apiHost + 'certificates/csr', csr);
   }
 }
