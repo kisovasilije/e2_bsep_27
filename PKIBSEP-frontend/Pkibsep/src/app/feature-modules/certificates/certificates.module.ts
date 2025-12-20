@@ -6,18 +6,11 @@ import { CertificatesRoutingModule } from './certificates-routing.module';
 import { CertificateListComponent } from './certificate-list/certificate-list.component';
 import { CreateRootCertificateComponent } from './create-root-certificate/create-root-certificate.component';
 import { IssueIntermediateCertificateComponent } from './issue-intermediate-certificate/issue-intermediate-certificate.component';
+import { CsrDialogComponent } from './csr-dialog/csr-dialog.component';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
-  declarations: [
-    CertificateListComponent,
-    CreateRootCertificateComponent,
-    IssueIntermediateCertificateComponent
-  ],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MaterialModule,
-    CertificatesRoutingModule
-  ]
+  declarations: [CertificateListComponent, CreateRootCertificateComponent, IssueIntermediateCertificateComponent, CsrDialogComponent],
+  imports: [CommonModule, ReactiveFormsModule, MaterialModule, CertificatesRoutingModule, MatButtonModule],
 })
-export class CertificatesModule { }
+export class CertificatesModule {}

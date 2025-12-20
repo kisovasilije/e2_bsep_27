@@ -1,0 +1,21 @@
+/* :host {
+  > div.form-body {
+    > mat-form-field.full {
+      width: 100%;
+    }
+  }
+} */
+
+:host > div.form-body {
+  display: flex;
+  flex-direction: column;
+
+  > label.label {
+    font-weight: 600;
+    margin-bottom: 0.5em;
+  }
+}
+
+/* div.form-body > input.file {
+  width: 100%;
+} */
