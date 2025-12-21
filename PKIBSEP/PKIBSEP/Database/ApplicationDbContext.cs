@@ -23,6 +23,8 @@ namespace PKIBSEP.Database
 
         public DbSet<PasswordShare> PasswordShares { get; set; }
 
+        public DbSet<Certificate2> Certificate2s { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -113,6 +115,19 @@ namespace PKIBSEP.Database
             {
                 e.HasKey(x => x.Id);
                 e.HasIndex(x => new { x.CaUserId, x.ChainRootCertificateId }).IsUnique();
+            });
+
+            modelBuilder.Entity<Certificate2>(entity =>
+            {
+                entity.HasOne(c => c.Subject)
+                    .WithMany()
+                    .HasForeignKey(c => c.SubjectId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(c => c.Issuer)
+                    .WithMany()
+                    .HasForeignKey(c => c.IssuerId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

@@ -1,11 +1,37 @@
 <h2 mat-dialog-title>Generate CSR</h2>
-<div mat-dialog-content class="form-body">
+<form [formGroup]="form" mat-dialog-content class="form-body">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>CA</mat-label>
+    <mat-select formControlName="issuer">
+      <mat-option *ngFor="let issuer of issuers" [value]="issuer">
+        {{ issuer.cn }}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="form.get('issuer')?.hasError('required')"> Issuer is required </mat-error>
+  </mat-form-field>
+
+  <div class="dates-row">
+    <mat-form-field appearance="outline">
+      <mat-label>Not before</mat-label>
+      <input matInput [matDatepicker]="fromPicker" formControlName="notBefore" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+      <mat-datepicker #fromPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Not after</mat-label>
+      <input matInput [matDatepicker]="toPicker" formControlName="notAfter" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+      <mat-datepicker #toPicker></mat-datepicker>
+    </mat-form-field>
+  </div>
+
   <label class="label">CSR</label>
-  <input type="file" (change)="onCsrPemChanged($event)" />
-</div>
+  <input type="file" accept=".csr" (change)="onCsrPemChanged($event)" />
+</form>
 <div mat-dialog-actions align="end" class="actions">
   <button mat-button color="primary" mat-dialog-close>Cancel</button>
-  <button mat-raised-button color="accent" [disabled]="isCreateCsrButtonDisabled" (click)="onCreateCsr()">
+  <button mat-raised-button color="accent" [disabled]="form.invalid" (click)="onCreateCsr()">
     <mat-icon>add</mat-icon>
     Create
   </button>

@@ -10,9 +10,10 @@ import { MatProgressSpinner, MatProgressSpinnerModule } from '@angular/material/
 import { MatCard, MatCardModule, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
 import { MatCheckbox, MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelect, MatSelectModule } from '@angular/material/select';
-import { MatOption } from '@angular/material/core';
+import { MatNativeDateModule, MatOption } from '@angular/material/core';
 import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 @NgModule({
   declarations: [],
@@ -30,28 +31,24 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatSelectModule,
     MatTooltipModule,
     MatDialogModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   exports: [
-    MatToolbar,
-    MatButton,
-    MatFormField,
-    MatLabel,
-    MatError,
-    MatHint,
-    MatInput,
-    MatTable,
-    MatIconButton,
-    MatIcon,
-    MatProgressSpinner,
-    MatCard,
-    MatCardHeader,
-    MatCardTitle,
-    MatCardContent,
-    MatCheckbox,
-    MatSelect,
-    MatOption,
-    MatTooltip,
+    MatToolbarModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTableModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatCardModule,
+    MatCheckboxModule,
+    MatSelectModule,
+    MatTooltipModule,
     MatDialogModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
 })
 export class MaterialModule {}

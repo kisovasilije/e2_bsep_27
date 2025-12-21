@@ -1,21 +1,26 @@
-/* :host {
-  > div.form-body {
-    > mat-form-field.full {
-      width: 100%;
-    }
-  }
-} */
-
-:host > div.form-body {
+:host > form.form-body {
   display: flex;
   flex-direction: column;
+
+  > mat-form-field {
+    margin: 0.3em 0;
+  }
 
   > label.label {
     font-weight: 600;
     margin-bottom: 0.5em;
   }
-}
 
-/* div.form-body > input.file {
-  width: 100%;
-} */
+  > .full-width {
+    width: 100%;
+  }
+
+  > div.dates-row {
+    display: flex;
+    gap: 1em;
+
+    > mat-form-field {
+      flex: 1;
+    }
+  }
+}
