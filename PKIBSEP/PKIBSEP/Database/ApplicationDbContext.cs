@@ -128,6 +128,9 @@ namespace PKIBSEP.Database
                     .WithMany()
                     .HasForeignKey(c => c.IssuerId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(c => new { c.IssuerId, c.SerialNumberHex })
+                    .IsUnique();
             });
         }
     }

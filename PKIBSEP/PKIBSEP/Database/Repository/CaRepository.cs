@@ -32,6 +32,14 @@ public class CaRepository : ICaRepository
         return certificate;
     }
 
+    public async Task<bool> ExistsAsync (string csrHashHex, int caId)
+    {
+        return await certificates
+            .AnyAsync(c => c.CsrHashHex == csrHashHex &&
+                c.IssuerId == caId &&
+                c.Type == Common.Enum.CertificateType.EndEntity);
+    }
+
     public async Task<List<Certificate2>> GetAllCAsAsync()
     {
         return await certificates

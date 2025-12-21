@@ -26,6 +26,8 @@ public class Certificate2
 
     public CertificateType Type { get; private set; }
 
+    public string? CsrHashHex { get; private set; }
+
     public User? Subject { get; private set; } = null;
 
     public Certificate2? Issuer { get; private set; } = null;
@@ -41,7 +43,8 @@ public class Certificate2
         DateTime notAfter,
         string privateKeyRef,
         string certRef,
-        CertificateType type)
+        CertificateType type,
+        string csrHashHex)
     {
         Id = id;
         SerialNumberHex = serialNumberHex;
@@ -54,6 +57,7 @@ public class Certificate2
         PrivateKeyRef = privateKeyRef;
         CertRef = certRef;
         Type = type;
+        CsrHashHex = csrHashHex;
     }
 
     public Certificate2 (

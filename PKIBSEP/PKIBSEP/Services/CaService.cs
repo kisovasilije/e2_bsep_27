@@ -78,11 +78,16 @@ public class CaService : ICaService
             throw new InvalidOperationException($"CA with ID {req.CaId} not found.");
         }
 
+        var csrHashHex = ComputeCsrHashHex(csr);
+        if (await caRepository.ExistsAsync(csrHashHex, ca.Id))
+        {
+            throw new InvalidOperationException("A certificate has already been issued for this CSR under the selected CA.");
+        }
+
         EnforceDateValidity(ca, req);
 
-        var (caPrivateKey, caCert, caCertPem) = GetCaKeyAndCert(
-            GetPath(caPrivateKeyBasePath, ca.PrivateKeyRef),
-            GetPath(caCertificateBasePath, ca.CertRef));
+        var caPrivateKey = ReadPrivateKeyFromPemFile(GetPath(caPrivateKeyBasePath, ca.PrivateKeyRef));
+        var caCert = ReadCertificateFromPemFile(ca.Pem);
 
         var gen = new X509V3CertificateGenerator();
         gen.SetSerialNumber(serial);
@@ -132,9 +137,10 @@ public class CaService : ICaService
             req.NotAfter,
             string.Empty,
             string.Empty,
-            Common.Enum.CertificateType.EndEntity));
+            Common.Enum.CertificateType.EndEntity,
+            csrHashHex));
 
-        return (clientCertPem, caCertPem, serialNumberHex);
+        return (clientCertPem, ca.Pem, serialNumberHex);
     }
 
     public async Task<Result<IEnumerable<CaDto>>> GetCAsAsync()
@@ -201,9 +207,8 @@ public class CaService : ICaService
         };
     }
 
-    private static X509Certificate ReadCertificateFromPemFile (string filePath)
+    private static X509Certificate ReadCertificateFromPemFile (string pem)
     {
-        var pem = File.ReadAllText(filePath);
         using var sr = new StringReader(pem);
         var pr = new PemReader(sr);
         var obj = pr.ReadObject();
@@ -224,14 +229,6 @@ public class CaService : ICaService
         return sw.ToString();
     }
 
-    private static (AsymmetricKeyParameter caPrivateKeyPem, X509Certificate caCert, string caCertPem) GetCaKeyAndCert(string keyPath, string certPath)
-    {
-        var caPrivateKeyPem = ReadPrivateKeyFromPemFile(keyPath);
-        var caCert = ReadCertificateFromPemFile(certPath);
-        var caCertPem = File.ReadAllText(certPath);
-        return (caPrivateKeyPem, caCert, caCertPem);
-    }
-
     private static void EnforceDateValidity(Certificate2 ca, CertificateSigningRequestDto req)
     {
         if (req.NotBefore < ca.NotBefore.ToUniversalTime())
@@ -248,8 +245,16 @@ public class CaService : ICaService
         }
     }
 
-    private string GetPath(string basePath, string fileName)
+    private static string GetPath(string basePath, string fileName)
     {
         return Path.Combine(basePath, fileName);
+    }
+
+    private static string ComputeCsrHashHex(Pkcs10CertificationRequest csr)
+    {
+        byte[] csrDer = csr.GetEncoded();
+        using var sha256 = SHA256.Create();
+        byte[] hash = sha256.ComputeHash(csrDer);
+        return Convert.ToHexString(hash);
     }
 }

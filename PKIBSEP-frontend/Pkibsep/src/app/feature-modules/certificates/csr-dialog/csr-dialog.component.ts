@@ -79,10 +79,16 @@ export class CsrDialogComponent implements OnInit {
       csrPem: csrPem.value!,
     };
 
-    this.certificateService.createCsr(payload).subscribe((csrResponse) => {
-      this.snackBar.open('CSR created successfully.', 'Close', { duration: 3000 });
+    this.certificateService.createCsr(payload).subscribe({
+      next: (csrResponse) => {
+        this.snackBar.open('CSR created successfully.', 'Close', { duration: 3000 });
 
-      this.dialogRef.close();
+        this.dialogRef.close();
+      },
+      error: (err) => {
+        console.log(err);
+        this.snackBar.open(`Error creating CSR: ${err.error || err.message}`, 'Close', { duration: 5000 });
+      },
     });
   }
 }
