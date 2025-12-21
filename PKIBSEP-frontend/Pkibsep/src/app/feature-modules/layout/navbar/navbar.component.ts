@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from 'src/app/infrastructure/auth/auth.service';
 import { User } from 'src/app/infrastructure/auth/model/user.model';
 import { CsrDialogComponent } from '../../certificates/csr-dialog/csr-dialog.component';
+import { USER_ROLE } from 'src/app/shared/constants';
 
 @Component({
   selector: 'xp-navbar',
@@ -32,5 +33,9 @@ export class NavbarComponent implements OnInit {
       disableClose: true,
       autoFocus: false,
     });
+  }
+
+  protected canCreateCsr(): boolean {
+    return this.user?.role.toLocaleLowerCase() === USER_ROLE.REGULAR_USER.toLocaleLowerCase();
   }
 }

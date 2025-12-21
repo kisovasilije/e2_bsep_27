@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using FluentResults;
+using Microsoft.Extensions.Options;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Operators;
@@ -9,7 +10,9 @@ using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Extension;
 using PKIBSEP.Common;
+using PKIBSEP.Dtos.Certificates;
 using PKIBSEP.Interfaces;
+using PKIBSEP.Models.Certificate;
 using System.Security.Cryptography;
 
 namespace PKIBSEP.Services;
@@ -18,42 +21,43 @@ public class CaService : ICaService
 {
     private static int rsaMinKeySizeBits = 2048;
 
-    private readonly AsymmetricKeyParameter caPrivateKey;
+    private readonly string caPrivateKeyBasePath;
 
-    private readonly X509Certificate caCert;
-
-    private readonly string caCertPem;
+    private readonly string caCertificateBasePath;
 
     private readonly int defaultValidityDays;
 
-    public CaService(IOptions<CaOptions> opts)
+    private readonly ICaRepository caRepository;
+
+    public CaService(IOptions<CaOptions> opts, ICaRepository caRepository)
     {
         var options = opts.Value;
 
-        if (string.IsNullOrEmpty(options.PrivateKeyPath))
+        if (string.IsNullOrEmpty(options.PrivateKeyBasePath))
         {
             throw new ArgumentException("CA private key path is not configured.");
         }
 
-        if (string.IsNullOrEmpty(options.CertificatePath))
+        if (string.IsNullOrEmpty(options.CertificateBasePath))
         {
             throw new ArgumentException("CA certificate path is not configured.");
         }
 
-        defaultValidityDays = options.DefaultValidityDays <= 0 ? 365 : options.DefaultValidityDays;
-        caPrivateKey = ReadPrivateKeyFromPemFile(options.PrivateKeyPath);
-        caCert = ReadCertificateFromPemFile(options.CertificatePath);
-        caCertPem = File.ReadAllText(options.CertificatePath);
+        defaultValidityDays = 365;
+        caPrivateKeyBasePath = options.PrivateKeyBasePath;
+        caCertificateBasePath = options.CertificateBasePath;
+
+        this.caRepository = caRepository;
     }
 
-    public (string clientCertPem, string caCertPem, string serialNumberHex) SignCsr(string csrPem)
+    public async Task<(string clientCertPem, string caCertPem, string serialNumberHex)> SignCsrAsync (CertificateSigningRequestDto req, int userId)
     {
-        if (string.IsNullOrWhiteSpace(csrPem))
+        if (string.IsNullOrWhiteSpace(req.CsrPem))
         {
             throw new ArgumentException("CSR PEM content is empty.");
         }
 
-        var csr = ParseCsr(csrPem);
+        var csr = ParseCsr(req.CsrPem);
         if (!csr.Verify())
         {
             throw new InvalidOperationException("CSR signature verification failed.");
@@ -68,15 +72,28 @@ public class CaService : ICaService
         string serialNumberHex;
         var serial = GenerateSerialNumber(out serialNumberHex);
 
-        var now = DateTimeOffset.UtcNow;
-        var notBefore = now.AddMinutes(-5);
-        var notAfter = now.AddDays(defaultValidityDays);
+        var ca = await caRepository.GetCaByIdAsync(req.CaId);
+        if (ca == null)
+        {
+            throw new InvalidOperationException($"CA with ID {req.CaId} not found.");
+        }
+
+        var csrHashHex = ComputeCsrHashHex(csr);
+        if (await caRepository.ExistsAsync(csrHashHex, ca.Id))
+        {
+            throw new InvalidOperationException("A certificate has already been issued for this CSR under the selected CA.");
+        }
+
+        EnforceDateValidity(ca, req);
+
+        var caPrivateKey = ReadPrivateKeyFromPemFile(GetPath(caPrivateKeyBasePath, ca.PrivateKeyRef));
+        var caCert = ReadCertificateFromPemFile(ca.Pem);
 
         var gen = new X509V3CertificateGenerator();
         gen.SetSerialNumber(serial);
         gen.SetIssuerDN(caCert.SubjectDN);
-        gen.SetNotBefore(notBefore.UtcDateTime);
-        gen.SetNotAfter(notAfter.UtcDateTime);
+        gen.SetNotBefore(req.NotBefore);
+        gen.SetNotAfter(req.NotAfter);
         gen.SetSubjectDN(subject);
         gen.SetPublicKey(publicKey);
 
@@ -107,9 +124,33 @@ public class CaService : ICaService
 
         var signatureFactory = new Asn1SignatureFactory("SHA256WITHRSA", caPrivateKey);
         X509Certificate clientCert = gen.Generate(signatureFactory);
-
         string clientCertPem = ConvertToPem(clientCert);
-        return (clientCertPem, caCertPem, serialNumberHex);
+
+        await caRepository.CreateAsync(new Certificate2(
+            0,
+            serialNumberHex,
+            userId,
+            ca.Id,
+            clientCertPem,
+            subject.ToString(),
+            req.NotBefore,
+            req.NotAfter,
+            string.Empty,
+            string.Empty,
+            Common.Enum.CertificateType.EndEntity,
+            csrHashHex));
+
+        return (clientCertPem, ca.Pem, serialNumberHex);
+    }
+
+    public async Task<Result<IEnumerable<CaDto>>> GetCAsAsync()
+    {
+        var certs = await caRepository.GetAllCAsAsync();
+        return Result.Ok(certs.Select(c => new CaDto(
+            Id: c.Id,
+            SubjectDn: c.SubjectDn,
+            NotBefore: c.NotBefore,
+            NotAfter: c.NotAfter)));
     }
 
     private static Pkcs10CertificationRequest ParseCsr(string csrPem)
@@ -166,9 +207,8 @@ public class CaService : ICaService
         };
     }
 
-    private static X509Certificate ReadCertificateFromPemFile (string filePath)
+    private static X509Certificate ReadCertificateFromPemFile (string pem)
     {
-        var pem = File.ReadAllText(filePath);
         using var sr = new StringReader(pem);
         var pr = new PemReader(sr);
         var obj = pr.ReadObject();
@@ -187,5 +227,34 @@ public class CaService : ICaService
         pemWriter.WriteObject(certificate);
         pemWriter.Writer.Flush();
         return sw.ToString();
+    }
+
+    private static void EnforceDateValidity(Certificate2 ca, CertificateSigningRequestDto req)
+    {
+        if (req.NotBefore < ca.NotBefore.ToUniversalTime())
+        {
+            req = req with { NotBefore = ca.NotBefore };
+        }
+        if (req.NotAfter > ca.NotAfter.ToUniversalTime())
+        {
+            req = req with { NotAfter = ca.NotAfter };
+        }
+        if (req.NotAfter <= req.NotBefore)
+        {
+            throw new InvalidOperationException("The requested NotAfter date must be later than NotBefore date.");
+        }
+    }
+
+    private static string GetPath(string basePath, string fileName)
+    {
+        return Path.Combine(basePath, fileName);
+    }
+
+    private static string ComputeCsrHashHex(Pkcs10CertificationRequest csr)
+    {
+        byte[] csrDer = csr.GetEncoded();
+        using var sha256 = SHA256.Create();
+        byte[] hash = sha256.ComputeHash(csrDer);
+        return Convert.ToHexString(hash);
     }
 }

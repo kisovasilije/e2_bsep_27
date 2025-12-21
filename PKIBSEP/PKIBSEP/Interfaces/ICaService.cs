@@ -1,6 +1,11 @@
-﻿namespace PKIBSEP.Interfaces;
+﻿using FluentResults;
+using PKIBSEP.Dtos.Certificates;
+
+namespace PKIBSEP.Interfaces;
 
 public interface ICaService
 {
-    (string clientCertPem, string caCertPem, string serialNumberHex) SignCsr (string csrPem);
+    Task<(string clientCertPem, string caCertPem, string serialNumberHex)> SignCsrAsync (CertificateSigningRequestDto csr, int userId);
+
+    Task<Result<IEnumerable<CaDto>>> GetCAsAsync ();
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PKIBSEP.Database;
@@ -11,9 +12,11 @@ using PKIBSEP.Database;
 namespace PKIBSEP.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251221145006_AddCertificate2Model")]
+    partial class AddCertificate2Model
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -178,13 +181,6 @@ namespace PKIBSEP.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CertRef")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("CsrHashHex")
-                        .HasColumnType("text");
-
                     b.Property<int>("IssuerId")
                         .HasColumnType("integer");
 
@@ -195,10 +191,6 @@ namespace PKIBSEP.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Pem")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PrivateKeyRef")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -213,15 +205,11 @@ namespace PKIBSEP.Migrations
                     b.Property<int>("SubjectId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("SubjectId");
+                    b.HasIndex("IssuerId");
 
-                    b.HasIndex("IssuerId", "SerialNumberHex")
-                        .IsUnique();
+                    b.HasIndex("SubjectId");
 
                     b.ToTable("Certificate2s");
                 });

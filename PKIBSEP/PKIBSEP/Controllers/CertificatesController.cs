@@ -139,11 +139,12 @@ namespace PKIBSEP.Controllers
         }
 
         [HttpPost("csr")]
-        public ActionResult<CsrResponseDto> SignCertificate(CertificateSigningRequestDto csr)
+        public async Task<ActionResult<CsrResponseDto>> SignCertificate(CertificateSigningRequestDto csr)
         {
             try
             {
-                var (clientCertPem, caCertPem, serialNumberHex) = caService.SignCsr(csr.CsrPem);
+                var userId = GetCurrentCaUserId();
+                var (clientCertPem, caCertPem, serialNumberHex) = await caService.SignCsrAsync(csr, userId);
 
                 return Ok(new CsrResponseDto(
                     clientCertPem: clientCertPem,
@@ -152,7 +153,21 @@ namespace PKIBSEP.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("issuers")]
+        public async Task<ActionResult<IEnumerable<CaDto>>> GetCAs ()
+        {
+            var result = await caService.GetCAsAsync();
+            if (result.IsSuccess)
+            {
+                return Ok(result.Value);
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { error = "Failed to retrieve CA certificates." });
             }
         }
     }

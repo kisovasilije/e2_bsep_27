@@ -2,7 +2,7 @@
   <div>
     <p>PKIBSEP</p>
     <div id="buttons">
-      <button *ngIf="user?.email !== ''" mat-raised-button color="primary" title="Generate CSR" (click)="onGenerateCsr()">
+      <button *ngIf="canCreateCsr()" mat-raised-button color="primary" title="Generate CSR" (click)="onGenerateCsr()">
         <mat-icon>key</mat-icon>
         CSR
       </button>

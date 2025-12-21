@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from 'src/env/environment';
 import { CertificateDto } from './models/certificate.model';
 import { CreateRootDto } from './models/create-root-dto.model';
@@ -8,6 +8,8 @@ import { IssueIntermediateDto } from './models/issue-intermediate-dto.model';
 import { UserDto } from './models/user.model';
 import { Csr } from './models/csr.model';
 import { CsrResponse } from './models/csr-response.model';
+import { Ca } from './models/ca.model';
+import { extractCn } from 'src/app/shared/utils/certificates.util';
 
 @Injectable({
   providedIn: 'root',
@@ -41,5 +43,16 @@ export class CertificateService {
 
   createCsr(csr: Csr): Observable<CsrResponse> {
     return this.http.post<CsrResponse>(environment.apiHost + 'certificates/csr', csr);
+  }
+
+  getCAs(): Observable<Ca[]> {
+    return this.http.get<Ca[]>(environment.apiHost + 'certificates/issuers').pipe(
+      map((issuers) =>
+        issuers.map((i) => ({
+          ...i,
+          cn: extractCn(i.subjectDn) || 'Unknown CN',
+        }))
+      )
+    );
   }
 }

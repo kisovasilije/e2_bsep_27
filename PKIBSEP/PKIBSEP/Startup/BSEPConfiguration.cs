@@ -56,6 +56,7 @@ namespace PKIBSEP.Startup
             services.AddScoped<ICertificateRepository, CertificateRepository>();
             services.AddScoped<ICaUserKeyRepository, CaUserKeyRepository>();
             services.AddScoped<ICaAssignmentRepository, CaAssignmentRepository>();
+            services.AddScoped<ICaRepository, CaRepository>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
