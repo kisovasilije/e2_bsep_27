@@ -55,4 +55,28 @@ public class Certificate2
         CertRef = certRef;
         Type = type;
     }
+
+    public Certificate2 (
+        string serialNumberHex,
+        int subjectId,
+        int issuerId,
+        string pem,
+        string subjectDn,
+        DateTime notBefore,
+        DateTime notAfter,
+        string privateKeyRef,
+        string certRef,
+        CertificateType type)
+    {
+        SerialNumberHex = serialNumberHex;
+        SubjectId = subjectId;
+        IssuerId = issuerId;
+        Pem = pem;
+        SubjectDn = subjectDn;
+        NotBefore = notBefore;
+        NotAfter = notAfter;
+        PrivateKeyRef = privateKeyRef;
+        CertRef = certRef;
+        Type = type;
+    }
 }

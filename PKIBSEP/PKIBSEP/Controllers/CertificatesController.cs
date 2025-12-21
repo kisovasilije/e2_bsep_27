@@ -143,7 +143,8 @@ namespace PKIBSEP.Controllers
         {
             try
             {
-                var (clientCertPem, caCertPem, serialNumberHex) = await caService.SignCsrAsync(csr);
+                var userId = GetCurrentCaUserId();
+                var (clientCertPem, caCertPem, serialNumberHex) = await caService.SignCsrAsync(csr, userId);
 
                 return Ok(new CsrResponseDto(
                     clientCertPem: clientCertPem,

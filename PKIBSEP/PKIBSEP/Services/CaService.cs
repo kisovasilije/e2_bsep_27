@@ -21,15 +21,9 @@ public class CaService : ICaService
 {
     private static int rsaMinKeySizeBits = 2048;
 
-    //private readonly AsymmetricKeyParameter caPrivateKey;
-
-    //private readonly X509Certificate caCert;
-
     private readonly string caPrivateKeyBasePath;
 
     private readonly string caCertificateBasePath;
-
-    //private readonly string caCertPem;
 
     private readonly int defaultValidityDays;
 
@@ -52,14 +46,11 @@ public class CaService : ICaService
         defaultValidityDays = 365;
         caPrivateKeyBasePath = options.PrivateKeyBasePath;
         caCertificateBasePath = options.CertificateBasePath;
-        //caPrivateKey = ReadPrivateKeyFromPemFile(options.PrivateKeyPath);
-        //caCert = ReadCertificateFromPemFile(options.CertificatePath);
-        //caCertPem = File.ReadAllText(options.CertificatePath);
 
         this.caRepository = caRepository;
     }
 
-    public async Task<(string clientCertPem, string caCertPem, string serialNumberHex)> SignCsrAsync (CertificateSigningRequestDto req)
+    public async Task<(string clientCertPem, string caCertPem, string serialNumberHex)> SignCsrAsync (CertificateSigningRequestDto req, int userId)
     {
         if (string.IsNullOrWhiteSpace(req.CsrPem))
         {
@@ -128,8 +119,21 @@ public class CaService : ICaService
 
         var signatureFactory = new Asn1SignatureFactory("SHA256WITHRSA", caPrivateKey);
         X509Certificate clientCert = gen.Generate(signatureFactory);
-
         string clientCertPem = ConvertToPem(clientCert);
+
+        await caRepository.CreateAsync(new Certificate2(
+            0,
+            serialNumberHex,
+            userId,
+            ca.Id,
+            clientCertPem,
+            subject.ToString(),
+            req.NotBefore,
+            req.NotAfter,
+            string.Empty,
+            string.Empty,
+            Common.Enum.CertificateType.EndEntity));
+
         return (clientCertPem, caCertPem, serialNumberHex);
     }
 

@@ -17,6 +17,21 @@ public class CaRepository : ICaRepository
         certificates = context.Set<Certificate2>();
     }
 
+    public async Task<Certificate2?> CreateAsync (Certificate2 certificate)
+    {
+        certificates.Add(certificate);
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+        return certificate;
+    }
+
     public async Task<List<Certificate2>> GetAllCAsAsync()
     {
         return await certificates
