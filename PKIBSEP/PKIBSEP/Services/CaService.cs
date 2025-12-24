@@ -13,6 +13,7 @@ using PKIBSEP.Common;
 using PKIBSEP.Dtos.Certificates;
 using PKIBSEP.Interfaces;
 using PKIBSEP.Models.Certificate;
+using PKIBSEP.Utils;
 using System.Security.Cryptography;
 
 namespace PKIBSEP.Services;
@@ -256,5 +257,11 @@ public class CaService : ICaService
         using var sha256 = SHA256.Create();
         byte[] hash = sha256.ComputeHash(csrDer);
         return Convert.ToHexString(hash);
+    }
+
+    public async Task<Result<IEnumerable<CertificatePreviewDto>>> GetCertificatesByUserIdAsync(int userId)
+    {
+        var certs = await caRepository.GetAllWithIssuerByUserId(userId);
+        return Result.Ok(certs.ToCertificatePreviewDtos());
     }
 }

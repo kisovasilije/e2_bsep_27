@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import { environment } from 'src/env/environment';
 import { CertificateDto } from './models/certificate.model';
 import { CreateRootDto } from './models/create-root-dto.model';
@@ -9,7 +9,8 @@ import { UserDto } from './models/user.model';
 import { Csr } from './models/csr.model';
 import { CsrResponse } from './models/csr-response.model';
 import { Ca } from './models/ca.model';
-import { extractCn } from 'src/app/shared/utils/certificates.util';
+import { extractCn, populateCertificateCns } from 'src/app/shared/utils/certificates.util';
+import { CertificatePreview, ReadonlyCertificatePreview } from './models/certificate-preview.model';
 
 @Injectable({
   providedIn: 'root',
@@ -47,12 +48,20 @@ export class CertificateService {
 
   getCAs(): Observable<Ca[]> {
     return this.http.get<Ca[]>(environment.apiHost + 'certificates/issuers').pipe(
-      map((issuers) =>
-        issuers.map((i) => ({
+      map(issuers =>
+        issuers.map(i => ({
           ...i,
           cn: extractCn(i.subjectDn) || 'Unknown CN',
         }))
       )
     );
+  }
+
+  /**
+   * Fetches all certificates belonging to the currently authenticated user.
+   * User ID is inferred from the authentication context on the server side
+   */
+  getAllByUserId(): Observable<CertificatePreview[]> {
+    return this.http.get<CertificatePreview[]>(environment.apiHost + 'certificates/user').pipe(tap(populateCertificateCns));
   }
 }

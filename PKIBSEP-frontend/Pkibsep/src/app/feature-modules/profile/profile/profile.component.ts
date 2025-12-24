@@ -4,6 +4,8 @@ import { SessionService } from '../session.service';
 import { User } from 'src/app/infrastructure/auth/model/user.model';
 import { AuthService } from 'src/app/infrastructure/auth/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { CertificatesPreviewComponent } from '../../certificates/certificates-preview/certificates-preview.component';
 
 @Component({
   selector: 'xp-profile',
@@ -20,13 +22,15 @@ export class ProfileComponent implements OnInit {
 
   private readonly snackBar = inject(MatSnackBar);
 
+  private readonly dialog = inject(MatDialog);
+
   ngOnInit(): void {
     this.initUser();
     this.initSessions();
   }
 
   private initUser(): void {
-    this.authService.user$.subscribe((user) => (this.user = { ...user }));
+    this.authService.user$.subscribe(user => (this.user = { ...user }));
   }
 
   private initSessions(): void {
@@ -34,18 +38,18 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
-    this.sessionService.getByUserId(this.user.id).subscribe((sessions) => {
+    this.sessionService.getByUserId(this.user.id).subscribe(sessions => {
       this.sessions = sessions;
     });
   }
 
   protected revokeSession(id: number): void {
     this.sessionService.revokeSession(id).subscribe({
-      next: (_) => {
-        this.sessions = this.sessions.filter((s) => s.id !== id);
+      next: _ => {
+        this.sessions = this.sessions.filter(s => s.id !== id);
         this.snackBar.open('Session revoked successfully.', 'Close', { duration: 3000 });
       },
-      error: (_) => {
+      error: _ => {
         this.snackBar.open(`Failed to revoke session`, 'Close', { duration: 3000 });
       },
     });
@@ -53,11 +57,11 @@ export class ProfileComponent implements OnInit {
 
   protected revokeAllSessions(): void {
     this.sessionService.revokeAllSessions().subscribe({
-      next: (_) => {
-        this.sessions = this.sessions.filter((s) => s.isThisSession);
+      next: _ => {
+        this.sessions = this.sessions.filter(s => s.isThisSession);
         this.snackBar.open('All other sessions revoked successfully.', 'Close', { duration: 3000 });
       },
-      error: (_) => {
+      error: _ => {
         this.snackBar.open(`Failed to revoke all sessions`, 'Close', { duration: 3000 });
       },
     });
@@ -70,12 +74,20 @@ export class ProfileComponent implements OnInit {
     }
 
     this.authService.requestPasswordRecovery({ email: this.user.email }).subscribe({
-      next: (response) => {
+      next: response => {
         this.snackBar.open(response.message || 'Password recovery email sent. Please check your inbox.', 'Close', { duration: 5000 });
       },
-      error: (err) => {
+      error: err => {
         this.snackBar.open(err.error?.message || 'Failed to send password recovery email', 'Close', { duration: 3000 });
       },
+    });
+  }
+
+  protected openMyCertificates(): void {
+    this.dialog.open(CertificatesPreviewComponent, {
+      width: '60%',
+      disableClose: false,
+      autoFocus: false,
     });
   }
 }

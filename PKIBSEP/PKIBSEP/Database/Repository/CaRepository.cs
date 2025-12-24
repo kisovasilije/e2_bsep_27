@@ -40,6 +40,14 @@ public class CaRepository : ICaRepository
                 c.Type == Common.Enum.CertificateType.EndEntity);
     }
 
+    public async Task<List<Certificate2>> GetAllWithIssuerByUserId (int userId)
+    {
+        return await certificates
+            .Where(c => c.SubjectId == userId)
+            .Include(c => c.Issuer)
+            .ToListAsync();
+    }
+
     public async Task<List<Certificate2>> GetAllCAsAsync()
     {
         return await certificates

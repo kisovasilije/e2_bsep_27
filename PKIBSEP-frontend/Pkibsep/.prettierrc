@@ -1,3 +1,5 @@
 {
-  "editorConfig": true
+  "editorConfig": true,
+  "arrowParens": "avoid",
+  "bracketSpacing": true
 }

@@ -1,0 +1,28 @@
+div.certificates-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 1em;
+
+  > div.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1em;
+
+    > div.header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+
+      > .header-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+
+      > h2 {
+        margin: 0;
+      }
+    }
+  }
+}

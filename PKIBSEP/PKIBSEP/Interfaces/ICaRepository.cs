@@ -11,4 +11,6 @@ public interface ICaRepository
     Task<Certificate2?> CreateAsync (Certificate2 certificate);
 
     Task<bool> ExistsAsync (string csrHashHex, int caId);
+
+    Task<List<Certificate2>> GetAllWithIssuerByUserId (int userId);
 }
