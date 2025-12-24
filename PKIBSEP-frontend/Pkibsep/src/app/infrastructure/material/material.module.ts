@@ -33,6 +33,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
     MatDialogModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatTableModule,
   ],
   exports: [
     MatToolbarModule,
@@ -49,6 +50,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
     MatDialogModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatTableModule,
   ],
 })
 export class MaterialModule {}

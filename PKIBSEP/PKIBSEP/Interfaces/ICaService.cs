@@ -8,4 +8,6 @@ public interface ICaService
     Task<(string clientCertPem, string caCertPem, string serialNumberHex)> SignCsrAsync (CertificateSigningRequestDto csr, int userId);
 
     Task<Result<IEnumerable<CaDto>>> GetCAsAsync ();
+
+    Task<Result<IEnumerable<CertificatePreviewDto>>> GetCertificatesByUserIdAsync (int userId);
 }

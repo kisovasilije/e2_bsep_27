@@ -167,7 +167,31 @@ namespace PKIBSEP.Controllers
             }
             else
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = "Failed to retrieve CA certificates." });
+                return StatusCode(StatusCodes.Status500InternalServerError, "Failed to retrieve CA certificates.");
+            }
+        }
+
+        [HttpGet("user")]
+        public async Task<ActionResult<IEnumerable<CertificatePreviewDto>>> GetCertificatesByUserId()
+        {
+            try
+            {
+                var userId = GetCurrentCaUserId();
+                var result = await caService.GetCertificatesByUserIdAsync(userId);
+                if (result.IsSuccess)
+                {
+                    return Ok(result.Value);
+                }
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Failed to retrieve certificates.");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
             }
         }
     }

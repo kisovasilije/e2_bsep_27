@@ -4,7 +4,7 @@ import { CertificateService } from '../certificate.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Ca } from '../models/ca.model';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CsrForm } from '../models/csr-form.model';
 
 @Component({
@@ -24,8 +24,6 @@ export class CsrDialogComponent implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
 
   private readonly dialogRef = inject(MatDialogRef<CsrDialogComponent>);
-
-  private readonly fb = inject(FormBuilder);
 
   constructor() {
     this.form = new FormGroup<CsrForm>({

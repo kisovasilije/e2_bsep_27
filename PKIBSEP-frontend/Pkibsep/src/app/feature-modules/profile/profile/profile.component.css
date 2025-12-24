@@ -1,6 +1,8 @@
-div.sessions-container {
+div.sessions-container,
+div.my-certificates {
   padding: 1em;
-  background-color: #eee;
+  border: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
   border-radius: 0.5em;
 }
 
@@ -25,4 +27,14 @@ div.session-card-end {
 button.revoke-all-sessions {
   width: 100%;
   margin-top: 1em;
+}
+
+div.my-certificates {
+  margin-top: 1em;
+
+  cursor: pointer;
+
+  > h2 {
+    margin-bottom: 0;
+  }
 }
