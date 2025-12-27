@@ -10,4 +10,6 @@ public interface ICaService
     Task<Result<IEnumerable<CaDto>>> GetCAsAsync ();
 
     Task<Result<IEnumerable<CertificatePreviewDto>>> GetCertificatesByUserIdAsync (int userId);
+
+    Task<Result<CertificatePreviewDto>> RevokeCertificateAsync (RevocationRequestDto request, int userId);
 }

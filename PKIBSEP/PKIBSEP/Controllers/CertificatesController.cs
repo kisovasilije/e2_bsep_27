@@ -194,5 +194,34 @@ namespace PKIBSEP.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
             }
         }
+
+        [HttpGet("revocation-reasons")]
+        public ActionResult<IEnumerable<RevocationReasonDto>> GetRevocationReasons()
+        {
+            return Enum.GetValues(typeof(Common.Enum.RevocationReason))
+                .Cast<Common.Enum.RevocationReason>()
+                .Select(rr => new RevocationReasonDto((int)rr, rr.ToString()))
+                .ToList();
+        }
+
+        [HttpPost("{id:int}/revoke")]
+        public async Task<ActionResult<CertificatePreviewDto>> RevokeCertificate([FromBody] RevocationRequestDto request)
+        {
+            try
+            {
+                var userId = GetCurrentCaUserId();
+                var result = await caService.RevokeCertificateAsync(request, userId);
+                if (result.IsSuccess)
+                {
+                    return Ok(result.Value);
+                }
+
+                return BadRequest(result.Value);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+        }
     }
 }

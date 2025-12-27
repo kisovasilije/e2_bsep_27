@@ -264,4 +264,28 @@ public class CaService : ICaService
         var certs = await caRepository.GetAllWithIssuerByUserId(userId);
         return Result.Ok(certs.ToCertificatePreviewDtos());
     }
+
+    public async Task<Result<CertificatePreviewDto>> RevokeCertificateAsync(RevocationRequestDto request, int userId)
+    {
+        if (!await caRepository.ExistsAsync(request.CertificateId))
+        {
+            return Result.Fail("Certificate requesting revocation does not exist.");
+        }
+
+        if (!Enum.IsDefined(typeof(Common.Enum.RevocationReason), request.Reason))
+        {
+            return Result.Fail("Invalid revocation reason specified.");
+        }
+
+        var certificate = (await caRepository.GetByIdAsync(request.CertificateId))!;
+        if (!certificate.IsRevocationRequestValid(userId))
+        {
+            return Result.Fail("Certificate validation error occurred.");
+        }
+
+        certificate.Revoke(request.Reason, request.Comment);
+
+        await caRepository.SaveChangesAsync();
+        return Result.Ok(certificate.ToCertificatePreviewDto());
+    }
 }

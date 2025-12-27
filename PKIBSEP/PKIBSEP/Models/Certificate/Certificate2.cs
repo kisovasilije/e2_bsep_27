@@ -28,6 +28,16 @@ public class Certificate2
 
     public string? CsrHashHex { get; private set; }
 
+    public DateTime? RevokedAt { get; private set; } = null;
+
+    public RevocationReason? RevocationReason { get; private set; } = null;
+
+    public string? RevocationComment { get; private set; } = string.Empty;
+
+    public int? RevokedBy { get; private set; } = null;
+
+    public bool IsRevoked { get; private set; } = false;
+
     public User? Subject { get; private set; } = null;
 
     public Certificate2? Issuer { get; private set; } = null;
@@ -44,7 +54,12 @@ public class Certificate2
         string privateKeyRef,
         string certRef,
         CertificateType type,
-        string csrHashHex)
+        string csrHashHex,
+        DateTime? revokedAt = null,
+        RevocationReason? revocationReason = null,
+        string? revocationComment = null,
+        int? revokedBy = null,
+        bool isRevoked = false)
     {
         Id = id;
         SerialNumberHex = serialNumberHex;
@@ -58,6 +73,11 @@ public class Certificate2
         CertRef = certRef;
         Type = type;
         CsrHashHex = csrHashHex;
+        RevokedAt = revokedAt;
+        RevocationReason = revocationReason;
+        RevocationComment = revocationComment;
+        RevokedBy = revokedBy;
+        IsRevoked = isRevoked;
     }
 
     public Certificate2 (
@@ -82,5 +102,19 @@ public class Certificate2
         PrivateKeyRef = privateKeyRef;
         CertRef = certRef;
         Type = type;
+    }
+
+    public bool IsRevocationRequestValid(int userId)
+    {
+        return !IsRevoked && SubjectId == userId;
+    }
+
+    public void Revoke(RevocationReason reason, string? comment)
+    {
+        RevokedAt = DateTime.UtcNow;
+        RevocationReason = reason;
+        RevocationComment = comment;
+        RevokedBy = SubjectId;
+        IsRevoked = true;
     }
 }

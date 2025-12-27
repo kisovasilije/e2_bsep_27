@@ -13,8 +13,6 @@ import { CsrForm } from '../models/csr-form.model';
   styleUrls: ['./csr-dialog.component.css'],
 })
 export class CsrDialogComponent implements OnInit {
-  protected csr: Csr | undefined = undefined;
-
   protected issuers: Ca[] = [];
 
   protected readonly form: FormGroup<CsrForm>;
@@ -39,7 +37,7 @@ export class CsrDialogComponent implements OnInit {
   }
 
   private init(): void {
-    this.certificateService.getCAs().subscribe((issuers) => {
+    this.certificateService.getCAs().subscribe(issuers => {
       this.issuers = [...issuers];
     });
   }
@@ -78,12 +76,12 @@ export class CsrDialogComponent implements OnInit {
     };
 
     this.certificateService.createCsr(payload).subscribe({
-      next: (csrResponse) => {
+      next: csrResponse => {
         this.snackBar.open('CSR created successfully.', 'Close', { duration: 3000 });
 
         this.dialogRef.close();
       },
-      error: (err) => {
+      error: err => {
         console.log(err);
         this.snackBar.open(`Error creating CSR: ${err.error || err.message}`, 'Close', { duration: 5000 });
       },

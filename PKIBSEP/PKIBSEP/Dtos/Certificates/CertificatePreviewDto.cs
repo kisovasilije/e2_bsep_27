@@ -12,5 +12,7 @@ public class CertificatePreviewDto
 
     public DateTime NotAfter { get; set; }
 
+    public bool IsRevoked { get; set; }
+
     public string Pem { get; set; } = string.Empty;
 }

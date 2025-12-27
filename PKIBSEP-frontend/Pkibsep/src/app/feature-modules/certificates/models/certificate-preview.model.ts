@@ -23,6 +23,7 @@ export interface CertificatePreview {
 
   notBefore: Date;
   notAfter: Date;
+  isRevoked: boolean;
   pem: string;
 }
 

@@ -16,6 +16,7 @@ public static class Mapper
             IssuedBy = cert.Issuer != null ? cert.Issuer.SubjectDn : "Self-signed",
             NotBefore = cert.NotBefore,
             NotAfter = cert.NotAfter,
+            IsRevoked = cert.IsRevoked,
             Pem = cert.Pem
         };
     }
