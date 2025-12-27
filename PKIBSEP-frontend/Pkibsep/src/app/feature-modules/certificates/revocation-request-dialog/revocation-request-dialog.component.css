@@ -1,0 +1,13 @@
+div.dialog-wrapper {
+  padding: 1em;
+  display: flex;
+  flex-direction: column;
+
+  > form.form-body {
+    padding-top: 0.5em;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+}

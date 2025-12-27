@@ -11,6 +11,8 @@ import { CsrResponse } from './models/csr-response.model';
 import { Ca } from './models/ca.model';
 import { extractCn, populateCertificateCns } from 'src/app/shared/utils/certificates.util';
 import { CertificatePreview, ReadonlyCertificatePreview } from './models/certificate-preview.model';
+import { RevocationReason } from './models/revocation-reason.model';
+import { RevocationRequest } from './models/revocation-request.model';
 
 @Injectable({
   providedIn: 'root',
@@ -63,5 +65,13 @@ export class CertificateService {
    */
   getAllByUserId(): Observable<CertificatePreview[]> {
     return this.http.get<CertificatePreview[]>(environment.apiHost + 'certificates/user').pipe(tap(populateCertificateCns));
+  }
+
+  getRevocationReasons(): Observable<RevocationReason[]> {
+    return this.http.get<RevocationReason[]>(environment.apiHost + 'certificates/revocation-reasons');
+  }
+
+  revokeCertificate(revocationRequest: RevocationRequest): Observable<CertificatePreview> {
+    return this.http.post<CertificatePreview>(environment.apiHost + `certificates/${revocationRequest.certificateId}/revoke`, revocationRequest);
   }
 }

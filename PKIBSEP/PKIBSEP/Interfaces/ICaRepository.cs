@@ -12,5 +12,11 @@ public interface ICaRepository
 
     Task<bool> ExistsAsync (string csrHashHex, int caId);
 
+    Task<bool> ExistsAsync (int id);
+
     Task<List<Certificate2>> GetAllWithIssuerByUserId (int userId);
+
+    Task<Certificate2?> GetByIdAsync (int id);
+
+    Task SaveChangesAsync();
 }

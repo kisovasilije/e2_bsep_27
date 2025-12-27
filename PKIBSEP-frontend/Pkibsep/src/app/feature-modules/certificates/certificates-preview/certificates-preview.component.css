@@ -3,6 +3,8 @@ div.certificates-wrapper {
   flex-direction: column;
   padding: 1em;
 
+  min-height: 50vh;
+
   > div.header {
     display: flex;
     justify-content: space-between;
@@ -25,4 +27,9 @@ div.certificates-wrapper {
       }
     }
   }
+}
+
+.revoked-row {
+  background-color: #ffebee;
+  color: #b71c1c;
 }

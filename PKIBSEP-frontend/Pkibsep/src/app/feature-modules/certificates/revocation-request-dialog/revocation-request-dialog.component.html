@@ -1,0 +1,25 @@
+<div class="dialog-wrapper">
+  <h2 mat-dialog-title>Revoke certificate</h2>
+  <form [formGroup]="form" mat-dialog-content class="form-body">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Revocation reason</mat-label>
+      <mat-select formControlName="reason">
+        <mat-option *ngFor="let reason of reasons" [value]="reason.value">
+          {{ reason.name }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('reason')?.hasError('required')"> Revocation reason is required </mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Comment</mat-label>
+      <textarea matInput rows="4" formControlName="comment" placeholder="Add a comment"> </textarea>
+    </mat-form-field>
+  </form>
+  <div mat-dialog-actions align="end" class="actions">
+    <button mat-button color="primary" mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="accent" [disabled]="form.invalid" (click)="revokeCertificate()">
+      <mat-icon>do_not_disturb</mat-icon>
+      Revoke
+    </button>
+  </div>
+</div>

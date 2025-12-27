@@ -40,6 +40,12 @@ public class CaRepository : ICaRepository
                 c.Type == Common.Enum.CertificateType.EndEntity);
     }
 
+    public async Task<bool> ExistsAsync(int id)
+    {
+        return await certificates
+            .AnyAsync(c => c.Id == id);
+    }
+
     public async Task<List<Certificate2>> GetAllWithIssuerByUserId (int userId)
     {
         return await certificates
@@ -59,5 +65,17 @@ public class CaRepository : ICaRepository
     {
         return await certificates
             .FirstOrDefaultAsync(c => c.Id == id);
+    }
+
+    public async Task<Certificate2?> GetByIdAsync (int id)
+    {
+        return await certificates
+            .Include(c => c.Issuer)
+            .FirstOrDefaultAsync(c => c.Id == id);
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await context.SaveChangesAsync();
     }
 }
