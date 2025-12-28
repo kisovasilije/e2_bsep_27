@@ -78,4 +78,17 @@ public class CaRepository : ICaRepository
     {
         await context.SaveChangesAsync();
     }
+
+    public async Task<List<Certificate2>> GetIntermediateCaCerttificatesAsync()
+    {
+        return await certificates
+            .Where(c => c.Type == Common.Enum.CertificateType.IntermediateCa)
+            .ToListAsync();
+    }
+
+    public async Task<Certificate2?> GetByIssuerIdAndSerialNumber(int issuerId, string serialNumberHex)
+    {
+        return await certificates
+            .FirstOrDefaultAsync(c => c.IssuerId == issuerId && c.SerialNumberHex == serialNumberHex);
+    }
 }

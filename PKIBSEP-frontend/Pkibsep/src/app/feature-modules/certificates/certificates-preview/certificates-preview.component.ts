@@ -29,7 +29,7 @@ export class CertificatesPreviewComponent implements OnInit {
 
   private init(): void {
     this.certificateObserverService.revokedCertificate$.subscribe(certificate => {
-      this.onCertificateRevoked(certificate);
+      this.updateCertificateRevocationStatus(certificate);
     });
 
     this.certificateService.getAllByUserId().subscribe(certificates => {
@@ -62,7 +62,7 @@ export class CertificatesPreviewComponent implements OnInit {
     });
   }
 
-  private onCertificateRevoked(certificate: ReadonlyCertificatePreview): void {
+  private updateCertificateRevocationStatus(certificate: ReadonlyCertificatePreview): void {
     const cert = this.certificates.find(c => c.id == certificate.id);
     if (!cert) {
       console.warn(`Certificate revocation data not updated.`);
