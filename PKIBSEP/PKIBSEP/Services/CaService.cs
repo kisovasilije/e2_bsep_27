@@ -1,10 +1,12 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Options;
+using Org.BouncyCastle.Asn1.Ocsp;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Operators;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
+using Org.BouncyCastle.Ocsp;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.X509;
@@ -15,6 +17,7 @@ using PKIBSEP.Interfaces;
 using PKIBSEP.Models.Certificate;
 using PKIBSEP.Utils;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace PKIBSEP.Services;
 
@@ -107,11 +110,7 @@ public class CaService : ICaService
         gen.AddExtension(
             X509Extensions.ExtendedKeyUsage,
             false,
-            new ExtendedKeyUsage(new[]
-            {
-                KeyPurposeID.IdKPServerAuth,
-                KeyPurposeID.IdKPClientAuth,
-            }));
+            new ExtendedKeyUsage([KeyPurposeID.IdKPServerAuth, KeyPurposeID.IdKPClientAuth]));
 
         gen.AddExtension(
             X509Extensions.SubjectKeyIdentifier,
@@ -189,7 +188,7 @@ public class CaService : ICaService
 
         bytes[0] &= 0x7F;
 
-        serialNumberHex = Convert.ToHexString(bytes).ToLowerInvariant();
+        serialNumberHex = Convert.ToHexString(bytes).ToUpperInvariant();
         return new BigInteger(1, bytes.ToArray());
     }
 
@@ -287,5 +286,97 @@ public class CaService : ICaService
 
         await caRepository.SaveChangesAsync();
         return Result.Ok(certificate.ToCertificatePreviewDto());
+    }
+
+    public async Task<byte[]> GetOcspResponseAsync(byte[] ocspRequestBytes)
+    {
+        OcspReq ocspReq = new OcspReq(ocspRequestBytes);
+        Req req = ocspReq.GetRequestList().Single();
+        CertificateID reqCertId = req.GetCertID();
+
+        var serialNumberHex = reqCertId.SerialNumber.ToString(16).ToUpperInvariant();
+
+        var intermediates = await caRepository.GetIntermediateCaCerttificatesAsync();
+        var issuer = intermediates.FirstOrDefault(c =>
+        {
+            var cert = ReadCertificateFromPemFile(c.Pem);
+            var computedId = new CertificateID(
+                reqCertId.HashAlgOid,
+                cert,
+                reqCertId.SerialNumber);
+
+            bool issuerMatches =
+                computedId.GetIssuerNameHash().SequenceEqual(reqCertId.GetIssuerNameHash()) &&
+                computedId.GetIssuerKeyHash().SequenceEqual(reqCertId.GetIssuerKeyHash());
+
+            return issuerMatches;
+        });
+
+        CertificateStatus certStatus;
+
+        if (issuer is null)
+        {
+            certStatus = new UnknownStatus();
+            return BuildOcspResponse(ocspReq, reqCertId, certStatus);
+        }
+
+        var server = await caRepository.GetByIssuerIdAndSerialNumber(issuer.Id, serialNumberHex);
+        if (server is null)
+        {
+            certStatus = new UnknownStatus();
+            return BuildOcspResponse(ocspReq, reqCertId, certStatus);
+        }
+
+        var now = DateTime.UtcNow;
+        if (now < server.NotBefore || now > server.NotAfter)
+        {
+            certStatus = new UnknownStatus();
+            return BuildOcspResponse(ocspReq, reqCertId, certStatus);
+        }
+
+        if (server.IsRevoked)
+        {
+            certStatus = new RevokedStatus(
+                server.RevokedAt!.Value,
+                (int) (server.RevocationReason ?? Common.Enum.RevocationReason.Unspecified));
+            return BuildOcspResponse(ocspReq, reqCertId, certStatus);
+        }
+
+        certStatus = CertificateStatus.Good;
+        return BuildOcspResponse(ocspReq, reqCertId, certStatus);
+    }
+
+    private static byte[] BuildOcspResponse(OcspReq ocspReq, CertificateID reqCertId, CertificateStatus certStatus)
+    {
+        var responderPem = File.ReadAllText(Common.Environment.OcspCertificatePath);
+        var responderCert = ReadCertificateFromPemFile(responderPem);
+        var responderPrivateKey = ReadPrivateKeyFromPemFile(Common.Environment.OcspPrivateKeyPath);
+        var responderPublicKey = responderCert.GetPublicKey();
+
+        var gen = new BasicOcspRespGenerator(responderPublicKey);
+
+        gen.AddResponse(
+            reqCertId,
+            certStatus,
+            DateTime.UtcNow,
+            DateTime.UtcNow.AddHours(12),
+            null);
+
+        var nonceExt = ocspReq.RequestExtensions?
+            .GetExtension(OcspObjectIdentifiers.PkixOcspNonce);
+
+        if (nonceExt is not null)
+        {
+            gen.SetResponseExtensions(new X509Extensions([OcspObjectIdentifiers.PkixOcspNonce], [nonceExt]));
+        }
+
+        BasicOcspResp basicResp = gen.Generate(
+            "SHA256withRSA",
+            responderPrivateKey,
+            [responderCert],
+            DateTime.UtcNow);
+
+        OcspResp ocspResp = new OCSPRespGenerator().Generate(OcspRespStatus.Successful, basicResp);
+        return ocspResp.GetEncoded();
     }
 }

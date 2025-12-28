@@ -859,3 +859,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 *.env
+
+PKIBSEP/PKIBSEP/Common/Envirnonment.cs

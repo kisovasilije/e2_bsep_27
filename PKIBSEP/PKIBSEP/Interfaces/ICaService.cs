@@ -12,4 +12,6 @@ public interface ICaService
     Task<Result<IEnumerable<CertificatePreviewDto>>> GetCertificatesByUserIdAsync (int userId);
 
     Task<Result<CertificatePreviewDto>> RevokeCertificateAsync (RevocationRequestDto request, int userId);
+
+    Task<byte[]> GetOcspResponseAsync(byte[] ocspRequestBytes);
 }

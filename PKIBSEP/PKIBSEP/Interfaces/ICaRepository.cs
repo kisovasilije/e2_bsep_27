@@ -19,4 +19,8 @@ public interface ICaRepository
     Task<Certificate2?> GetByIdAsync (int id);
 
     Task SaveChangesAsync();
+
+    Task<List<Certificate2>> GetIntermediateCaCerttificatesAsync();
+
+    Task<Certificate2?> GetByIssuerIdAndSerialNumber(int issuerId, string serialNumberHex);
 }
