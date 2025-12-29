@@ -122,6 +122,12 @@ public class CaService : ICaService
             false,
             new AuthorityKeyIdentifierStructure(caCert));
 
+        var aia = new AuthorityInformationAccess(new AccessDescription(
+            AccessDescription.IdADOcsp,
+            new GeneralName(GeneralName.UniformResourceIdentifier, "http://localhost:5096/api/ocsp")));
+
+        gen.AddExtension(X509Extensions.AuthorityInfoAccess, false, aia);
+
         var signatureFactory = new Asn1SignatureFactory("SHA256WITHRSA", caPrivateKey);
         X509Certificate clientCert = gen.Generate(signatureFactory);
         string clientCertPem = ConvertToPem(clientCert);
