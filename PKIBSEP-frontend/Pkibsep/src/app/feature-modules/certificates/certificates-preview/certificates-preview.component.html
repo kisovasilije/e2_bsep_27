@@ -41,10 +41,22 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let cert">
-        <button mat-icon-button aria-label="Download certificate" [disabled]="cert.isRevoked" (click)="downloadCertificate(cert)">
+        <button
+          mat-icon-button
+          aria-label="Download certificate"
+          [disabled]="cert.isRevoked"
+          title="Download certificate"
+          (click)="downloadCertificate(cert)"
+        >
           <mat-icon>download</mat-icon>
         </button>
-        <button mat-icon-button aria-label="Revoke certificate" [disabled]="cert.isRevoked" (click)="openCertificateRevocationDialog(cert)">
+        <button
+          mat-icon-button
+          aria-label="Revoke certificate"
+          [disabled]="cert.isRevoked"
+          title="Revoke certificate"
+          (click)="openCertificateRevocationDialog(cert)"
+        >
           <mat-icon>remove_circle</mat-icon>
         </button>
       </td>
